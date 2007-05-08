@@ -3,7 +3,7 @@
 <title>JAtari</title>
 
 <style type="text/css">
-	p, th, td {
+	p, th, td, input {
 		font-family: "verdana", helvetica;
 		font-size: 8pt;
 	}
@@ -12,11 +12,13 @@
 	}
 	table {
 		border-collapse: collapse;
+		empty-cells: show;
 	}
 
 </style>
 
 <script type="text/javascript">
+
 function show_memory()
 {
 	if(document.getElementById('display_memory').checked == true)
@@ -32,6 +34,7 @@ function show_cpu()
 	else
 		document.getElementById('cpu').style.display = 'none';
 }
+
 </script>
 
 </head>
@@ -41,23 +44,23 @@ function show_cpu()
 
 <!-- Debuggers -->
 <p><b>Debuggers:</b>&nbsp;
-	<input type="checkbox" id="display_memory" onclick="show_memory()">Memory
 	<input type="checkbox" id="display_cpu" onclick="show_cpu()">CPU (6502)
+	<input type="checkbox" id="display_memory" onclick="show_memory()">Memory
 </p>
 <p><input id="step" type="button" value="Step" onclick="document.getElementById('JAtari').step();"></p>
-
-<!-- Memory Debugger -->
-<div id="memory" style="display: none;">
-	<hr>
-	<p>Initial position: $<input id="memory_pos" type="text" size=4 maxlength=4 value="0000" onchange="memory_pos_changed()"></p>
-	<div id="memory_table"></div>
-</div>
 
 <!-- CPU Debugger -->
 <div id="cpu" style="display: none;">
 	<hr>
-	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="cpu_pos_changed()"></p>
+	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JAtari').cpuPosChanged(this.value)"></p>
 	<div id="cpu_table"></div>
+</div>
+
+<!-- Memory Debugger -->
+<div id="memory" style="display: none;">
+	<hr>
+	<p>Initial position: $<input id="memory_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JAtari').memoryPosChanged(this.value)"></p>
+	<div id="memory_table"></div>
 </div>
 
 </body>
