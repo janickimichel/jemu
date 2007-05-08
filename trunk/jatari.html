@@ -1,0 +1,64 @@
+<html>
+<head>
+<title>JAtari</title>
+
+<style type="text/css">
+	p, th, td {
+		font-family: "verdana", helvetica;
+		font-size: 8pt;
+	}
+	td.memory {
+		text-align: center;
+	}
+	table {
+		border-collapse: collapse;
+	}
+
+</style>
+
+<script type="text/javascript">
+function show_memory()
+{
+	if(document.getElementById('display_memory').checked == true)
+		document.getElementById('memory').style.display = 'block';
+	else
+		document.getElementById('memory').style.display = 'none';
+}
+
+function show_cpu()
+{
+	if(document.getElementById('display_cpu').checked == true)
+		document.getElementById('cpu').style.display = 'block';
+	else
+		document.getElementById('cpu').style.display = 'none';
+}
+</script>
+
+</head>
+<body>
+<p><applet id="JAtari" code="JAtari" codebase="classes/" width=320 
+           height=192 mayscript></applet></p>
+
+<!-- Debuggers -->
+<p><b>Debuggers:</b>&nbsp;
+	<input type="checkbox" id="display_memory" onclick="show_memory()">Memory
+	<input type="checkbox" id="display_cpu" onclick="show_cpu()">CPU (6502)
+</p>
+<p><input id="step" type="button" value="Step" onclick="document.getElementById('JAtari').step();"></p>
+
+<!-- Memory Debugger -->
+<div id="memory" style="display: none;">
+	<hr>
+	<p>Initial position: $<input id="memory_pos" type="text" size=4 maxlength=4 value="0000" onchange="memory_pos_changed()"></p>
+	<div id="memory_table"></div>
+</div>
+
+<!-- CPU Debugger -->
+<div id="cpu" style="display: none;">
+	<hr>
+	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="cpu_pos_changed()"></p>
+	<div id="cpu_table"></div>
+</div>
+
+</body>
+</html>
