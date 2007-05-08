@@ -2,22 +2,41 @@ import netscape.javascript.JSObject;
 
 public class Memory
 {
-	private byte ram[];
+	private short ram[];
+	public int debugPos;
 
 	public Memory(int size_k)
 	{
-		ram = new byte[size_k * 1024];
+		ram = new short[size_k * 1024];
 		for(int i=0; i<(size_k * 1024); i++)
 			ram[i] = 0x0;
 	}
 
-	public byte get(int pos)
+	public short get(int pos)
 	{
 		return ram[pos];
 	}
 
+	/*
+	public void set(int pos, short data)
+	{
+		ram[pos] = data;
+	}
+	*/
+
+	public void set(int pos, short data, int cycles)
+	{
+		ram[pos] = data;
+	}
+
+	public void setDirect(int pos, short data)
+	{
+		ram[pos] = data;
+	}
+
 	public void rebuildDebugger(int pos)
 	{
+		debugPos = pos;
 		JSObject table = (JSObject)JEmu.Window.eval("document.getElementById('memory_table');");
 		String s = "<table border='1'><th>Address</th>";
 		
@@ -41,5 +60,8 @@ public class Memory
 		}
 
 		table.setMember("innerHTML", s + "</table>");
+
+		JSObject memory_pos = (JSObject)JEmu.Window.eval("document.getElementById('memory_pos');");
+		memory_pos.setMember("value", Integer.toHexString(pos).toUpperCase());
 	}
 }
