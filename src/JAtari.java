@@ -10,13 +10,22 @@ public class JAtari extends JEmu
 	//
 	public void init()
 	{
+		// architecturs
 		memory = new Memory(64);
 		cpu = new m6502();
-		loadROM("rom/atari2600/simple.bin");
-	}
+		Device pia = new PIA6532();
+		video = new TIA1A();
 
-	public void paint(Graphics g) 
-	{
+		// add devices
+		devices = new Device[1];
+		devices[0] = pia;
+
+		// memory maps
+		memory.addMemoryMap(0x0, 0x7F, video);
+		memory.addMemoryMap(0x294, 0x297, pia);
+
+		// load ROM
+		loadROM("rom/atari2600/simple.bin");
 	}
 
 	//
@@ -38,7 +47,6 @@ public class JAtari extends JEmu
 			int c;
 			while((c = in.read()) != -1)
 			{
-				System.out.println(Integer.toHexString(c));
 				memory.setDirect(pos, ((Integer)c).shortValue());
 				pos++;
 			}
@@ -47,5 +55,13 @@ public class JAtari extends JEmu
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public void step()
+	{
+		int cycles = cpu.step();
+		video.step(cycles * 3);
+		for(Device d: devices)
+			d.step(cycles);
 	}
 }

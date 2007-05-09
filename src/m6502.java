@@ -3,13 +3,13 @@ class m6502 extends CPU
 	private int PC;
 
 	// registers
-	private short A, X, Y;
+	private int A, X, Y;
 
 	// flags
 	private boolean S, O, B, D, I, Z, C;
 
 	// stack pointer
-	private short SP;
+	private int SP;
 
 	public void reset()
 	{
@@ -22,10 +22,12 @@ class m6502 extends CPU
 	public int step()
 	{
 		int cycles = 0, bytes_left = 0, bytes_inst = 0;
-		short opcode = 0;
-		short lsrc = 0, hsrc = 0;
+		int opcode = 0;
+		int lsrc = 0, hsrc = 0;
 		int src = 0, address = 0;
 		int temp;
+
+		lastInstructionPointer = PC;
 
 		do
 		{
@@ -513,30 +515,27 @@ class m6502 extends CPU
 			case 0x75:
 			case 0x79:
 			case 0x7D:
-				/* TODO - rever
-				temp = src + A + ((C!=0) ? 1 : 0);
+				// TODO - review
+				temp = src + A + ((C) ? 1 : 0);
 				// This is not valid in decimal mode
-				SET_ZERO(temp & 0xff);
+				Z = ((temp & 0xff) == 0);
 				if (D) 
 				{
-					if (((A&0xf)+(src&0xf)+((C!=0) ? 1 : 0))>9)
+					if (((A&0xf)+(src&0xf)+((C) ? 1 : 0))>9)
 						temp += 6;
-					SET_SIGN(temp);
-					SET_OVERFLOW(!((A^src)&0x80)
-							&&((A^temp)&0x80));
+					S = ((temp & 0x80) > 0);
+					O = !((((A^src)&0x80)&((A^temp)&0x80)) > 0);
 					if (temp > 0x99) 
 						temp += 96;
-					SET_CARRY(temp > 0x99);
+					C = ((temp > 0x99));
 				} 
 				else 
 				{
-					SET_SIGN(temp);
-					SET_OVERFLOW(!((A^src)&0x80)
-							&&((A^temp)&0x80));
-					SET_CARRY(temp > 0xff);
+					S = ((temp & 0x80) > 0);
+					O = !((((A^src)&0x80)&((A^temp)&0x80)) > 0);
+					C = (temp > 0xff);
 				}
-				A = ((BYTE) temp);
-				*/
+				A = temp & 0xFF;
 				break;
 
 			/* *****
@@ -551,8 +550,8 @@ class m6502 extends CPU
 			case 0x39:
 			case 0x3D:
 				A &= src;
-				SET_SIGN(A);
-				SET_ZERO(A);
+				S = ((A & 0x80) > 0);
+				Z = (A == 0);
 				break;
 
 			/* *****
@@ -563,11 +562,11 @@ class m6502 extends CPU
 			case 0x16:
 			case 0x0E:
 			case 0x1E:
-				SET_CARRY(src & 0x80);
+				C = ((src & 0x80) > 0);
 				src <<= 1;
 				src &= 0xFF;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				if (opcode == 0x0A)
 					A = src;
 				else
@@ -612,10 +611,10 @@ class m6502 extends CPU
 			 *******/
 			case 0x24:
 			case 0x2C:
-				SET_SIGN(src);
+				S = ((src & 0x80) > 0);
 				/* Copy bit 6 to OVERFLOW flag. */
-				SET_OVERFLOW(0x40 & src);
-				SET_ZERO(src & A);
+				O = ((0x40 & src) > 0);
+				Z = ((src & A) == 0);
 				break;
 
 			/* *****
@@ -658,9 +657,9 @@ class m6502 extends CPU
 				/* push return address onto the stack */
 				PUSH((PC >> 8) & 0xFF, cycles);
 				PUSH(PC & 0xFF, cycles);
-				SET_BREAK((1));
+				B = true;
 				PUSH(SP, cycles);
-				SET_INTERRUPT((1));
+				I = true;
 				PC = (memory.get(0xFFFE)|(memory.get(0xFFFF)<<8));
 				break;
 
@@ -690,28 +689,28 @@ class m6502 extends CPU
 			 * CLC *  -> Clear carry flag
 			 *******/
 			case 0x18:
-				SET_CARRY(0);
+				C = false;
 				break;
 
 			/* *****
 			 * CLD *  -> Clear decimal flag
 			 *******/
 			case 0xD8:
-				SET_DECIMAL(0);
+				D = false;
 				break;
 
 			/* *****
 			 * CLI *  -> Clear interrupt flag
 			 *******/
 			case 0x58:
-				SET_INTERRUPT(0);
+				I = false;
 				break;
 
 			/* *****
 			 * CLV *  -> Clear overflow flag
 			 *******/
 			case 0xB8:
-				SET_OVERFLOW(0);
+				O = false;
 				break;
 
 			/* *****
@@ -726,9 +725,9 @@ class m6502 extends CPU
 			case 0xC1:
 			case 0xD1:
 				src = A - src;
-				SET_CARRY(src < 0x100);
-				SET_SIGN(src);
-				SET_ZERO(src &= 0xff);
+				C = (src < 0x100);
+				S = ((src & 0x80) > 0);
+				Z = ((src &= 0xff) == 0);
 				break;
 
 			/* *****
@@ -738,9 +737,9 @@ class m6502 extends CPU
 			case 0xE4:
 			case 0xEC:
 				src = X - src;
-				SET_CARRY(src < 0x100);
-				SET_SIGN(src);
-				SET_ZERO(src &= 0xff);
+				C = (src < 0x100);
+				S = ((src & 0x80) > 0);
+				Z = ((src &= 0xff) == 0);
 				break;
 				
 			/* *****
@@ -750,9 +749,9 @@ class m6502 extends CPU
 			case 0xC4:
 			case 0xCC:
 				src = Y - src;
-				SET_CARRY(src < 0x100);
-				SET_SIGN(src);
-				SET_ZERO(src &= 0xff);
+				C = (src < 0x100);
+				S = ((src & 0x80) > 0);
+				Z = ((src &= 0xff) == 0);
 				break;
 
 			/* *****
@@ -763,8 +762,8 @@ class m6502 extends CPU
 			case 0xCE:
 			case 0xDE:
 				src = (src - 1) & 0xff;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				memory.set(address,src,cycles);
 				break;
 
@@ -772,18 +771,18 @@ class m6502 extends CPU
 			 * DEX *  -> Decrement X by one
 			 *******/
 			case 0xCA:
-				X = (X - 1) & 0xff;
-				SET_SIGN(X);
-				SET_ZERO(X);
+				X = (X-1) & 0xFF;
+				S = ((X & 0x80) > 0);
+				Z = (X == 0);
 				break;
 
 			/* *****
 			 * DEY *  -> Decrement Y by one
 			 *******/
 			case 0x88:
-				Y = (Y - 1) & 0xff;
-				SET_SIGN(Y);
-				SET_ZERO(Y);
+				Y = (Y-1) & 0xFF;
+				S = ((Y & 0x80) > 0);
+				Z = (Y == 0);
 				break;
 
 			/* *****
@@ -798,8 +797,8 @@ class m6502 extends CPU
 			case 0x41:
 			case 0x51:
 				src ^= A;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				A = src;
 				break;
 
@@ -811,8 +810,8 @@ class m6502 extends CPU
 			case 0xEE:
 			case 0xFE:
 				src = (src + 1) & 0xff;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				memory.set(address, src, cycles);
 				break;
 
@@ -821,8 +820,8 @@ class m6502 extends CPU
 			 *******/
 			case 0xE8:
 				X = (X+1) & 0xFF;
-				SET_SIGN(X);
-				SET_ZERO(X);
+				S = ((X & 0x80) > 0);
+				Z = (X == 0);
 				break;
 
 			/* *****
@@ -830,8 +829,8 @@ class m6502 extends CPU
 			 *******/
 			case 0xC8:
 				Y = (Y+1) & 0xFF;
-				SET_SIGN(Y);
-				SET_ZERO(Y);
+				S = ((Y & 0x80) > 0);
+				Z = (Y == 0);
 				break;
 
 			/* *****
@@ -864,8 +863,8 @@ class m6502 extends CPU
 			case 0xB9:
 			case 0xA1:
 			case 0xB1:
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				A = src;
 				break;
 
@@ -877,8 +876,8 @@ class m6502 extends CPU
 			case 0xB6:
 			case 0xAE:
 			case 0xBE:
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				X = src;
 				break;
 
@@ -890,8 +889,8 @@ class m6502 extends CPU
 			case 0xB4:
 			case 0xAC:
 			case 0xBC:
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				Y = src;
 				break;
 
@@ -903,10 +902,10 @@ class m6502 extends CPU
 			case 0x56:
 			case 0x4E:
 			case 0x5E:
-				SET_CARRY(src & 0x01);
+				C = ((src & 0x01) > 0);
 				src >>= 1;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				if(opcode == 0x4A)
 					A = src;
 				else
@@ -933,8 +932,8 @@ class m6502 extends CPU
 			case 0x01:
 			case 0x11:
 				src |= A;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				A = src;
 				break;
 
@@ -959,8 +958,8 @@ class m6502 extends CPU
 			 *******/
 			case 0x68:
 				src = PULL();
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				A = src;
 				break;
 
@@ -985,8 +984,8 @@ class m6502 extends CPU
 					src |= 0x1;
 				C = (src > 0xff);
 				src &= 0xff;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				if(opcode == 0x2A)
 					A = src;
 				else
@@ -1003,10 +1002,10 @@ class m6502 extends CPU
 			case 0x7E:
 				if(C)
 					src |= 0x100;
-				SET_CARRY(src & 0x01);
+				C = ((src & 0x01) > 0);
 				src >>= 1;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				if(opcode == 0x6A)
 					A = src;
 				else
@@ -1044,42 +1043,40 @@ class m6502 extends CPU
 			case 0xF9:
 			case 0xE1:
 			case 0xF1:
-				/* TODO - rever
-				temp = A - src - ((C!=0) ? 0 : 1);
-				SET_SIGN(temp);
-				SET_ZERO(temp & 0xFF);
-				SET_OVERFLOW(((A^temp)&0x80)&&((A^src)&0x80));
+				temp = A - src - (C ? 0 : 1);
+				S = ((temp & 0x80) > 0);
+				Z = ((temp & 0xFF) == 0);
+				O = ((((A^temp)&0x80)&((A^src)&0x80)) > 0);
 				if(D) 
 				{
-					if(((A&0xf)-((C!=0)?0:1))<(src&0xf))
+					if(((A&0xf)-(C?0:1))<(src&0xf))
 						temp -= 6;
 					if(temp>0x99)
 						temp -= 0x60;
 				}
-				SET_CARRY(temp < 0x100);
+				C = (temp < 0x100);
 				A = (temp & 0xFF);
-				*/
 				break;
 
 			/* *****
 			 * SEC *  -> Set carry flag
 			 *******/
 			case 0x38:
-				SET_CARRY((1));
+				C = true;
 				break;
 
 			/* *****
 			 * SED *  -> Set decimal mode
 			 *******/
 			case 0xF8:
-				SET_DECIMAL((1));
+				D = true;
 				break;
 
 			/* *****
 			 * SEI *  -> Set interrupt disable status
 			 *******/
 			case 0x78:
-				SET_INTERRUPT((1));
+				I = true;
 				break;
 
 			/* *****
@@ -1118,8 +1115,8 @@ class m6502 extends CPU
 			 *******/
 			case 0xAA:
 				src = A;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				X = src;
 				break;
 
@@ -1128,8 +1125,8 @@ class m6502 extends CPU
 			 *******/
 			case 0xA8:
 				src = A;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				Y = src;
 				break;
 
@@ -1138,8 +1135,8 @@ class m6502 extends CPU
 			 *******/
 			case 0xBA:
 				src = SP;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				X = src;
 				break;
 
@@ -1148,8 +1145,8 @@ class m6502 extends CPU
 			 *******/
 			case 0x8A:
 				src = X;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				A = src;
 				break;
 
@@ -1166,8 +1163,8 @@ class m6502 extends CPU
 			 *******/
 			case 0x98:
 				src = Y;
-				SET_SIGN(src);
-				SET_ZERO(src);
+				S = ((src & 0x80) > 0);
+				Z = (src == 0);
 				A = src;
 				break;
 		}
@@ -1190,9 +1187,9 @@ class m6502 extends CPU
 	{
 		DebugValues dv = new DebugValues();
 		int bytes_left = 0;
-		short opcode = 0;
-		short lsrc = 0, hsrc = 0;
-		short src = 0;
+		int opcode = 0;
+		int lsrc = 0, hsrc = 0;
+		int src = 0;
 		int pc = pos;
 
 		do
@@ -1939,61 +1936,12 @@ class m6502 extends CPU
 	//
 	// private methods (hacks)
 	//
-	private void SET_SIGN(int a)      
-	{
-		if((a)&0x80 > 0)
-			S = true; 
-		else
-			S = false;
-	}
-	private void SET_ZERO(int a)      
-	{ 
-		if(a == 0)
-			Z = true; 
-		else
-			Z = false;
-	}
-	private void SET_CARRY(int a)
-	{ 
-		if(a > 0)
-			C = true;
-		else
-			C = false;
-	}
-	private void SET_INTERRUPT(int a)
-	{ 
-		if(a > 0)
-			I = true;
-		else
-			I = false;
-	}
-	private void SET_DECIMAL(int a)   
-	{ 
-		if(a > 0)
-			D = true;
-		else
-			D = false;
-	}
-	private void SET_OVERFLOW(int a)
-	{ 
-		if(a > 0)
-			O = true;
-		else
-			O = false;
-	}
-	private void SET_BREAK(int a)	
-	{ 
-		if(a > 0)
-			B = true;
-		else
-			B = false;
-	}
 	private void PUSH(int b, int cycles) 
 	{ 
 		memory.set(SP+0x100, b ,cycles);
 		SP--;
 	}
-	private short PULL()
+	private int PULL()
 	{
 		return memory.get((++SP)+0x100);
 	}
