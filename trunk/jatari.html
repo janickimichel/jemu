@@ -3,8 +3,12 @@
 <title>JAtari</title>
 
 <style type="text/css">
-	p, th, td, input {
+	p, th, input {
 		font-family: "verdana", helvetica;
+		font-size: 8pt;
+	}
+	td {
+		font-family: monospace;
 		font-size: 8pt;
 	}
 	td.memory {
@@ -35,6 +39,25 @@ function show_cpu()
 		document.getElementById('cpu').style.display = 'none';
 }
 
+function show_pia()
+{
+	if(document.getElementById('display_pia').checked == true)
+		document.getElementById('pia').style.display = 'block';
+	else
+		document.getElementById('pia').style.display = 'none';
+}
+
+function debug_line(decolor, color)
+{
+	c = document.getElementById('p' + color);
+	d = document.getElementById('p' + decolor);
+	for(var i=1; i<=4; i++)
+	{
+		c.cells[i].style.backgroundColor = "yellow";
+		d.cells[i].style.backgroundColor = "transparent";
+	}
+}
+
 </script>
 
 </head>
@@ -44,16 +67,23 @@ function show_cpu()
 
 <!-- Debuggers -->
 <p><b>Debuggers:</b>&nbsp;
-	<input type="checkbox" id="display_cpu" onclick="show_cpu()">CPU (6502)
+	<input type="checkbox" id="display_cpu" onclick="show_cpu()">MOS 6502 (CPU)
+	<input type="checkbox" id="display_pia" onclick="show_pia()">PIA 6532 (timer)
 	<input type="checkbox" id="display_memory" onclick="show_memory()">Memory
 </p>
-<p><input id="step" type="button" value="Step" onclick="document.getElementById('JAtari').step();"></p>
+<p><input id="step" type="button" value="Step" onclick="document.getElementById('JAtari').stepButton();"></p>
 
 <!-- CPU Debugger -->
 <div id="cpu" style="display: none;">
 	<hr>
 	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JAtari').cpuPosChanged(this.value)"></p>
 	<div id="cpu_table"></div>
+</div>
+
+<!-- PIA Debugger -->
+<div id="pia" style="display: none;">
+	<hr>
+	<div id="pia_table"></div>
 </div>
 
 <!-- Memory Debugger -->

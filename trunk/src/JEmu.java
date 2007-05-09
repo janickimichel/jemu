@@ -7,12 +7,15 @@ public abstract class JEmu extends JApplet
 {
 	public Memory memory;
 	public CPU cpu;
+	public Video video;
+	public Device devices[];
 	public static JSObject Window = null;
 
 	// 
 	// abstract methods
 	//
 	abstract void loadROM(String file);
+	abstract void step();
 
 	//
 	// applet methods
@@ -24,14 +27,32 @@ public abstract class JEmu extends JApplet
 		cpu.memory = memory;
 		cpu.reset();
 		cpu.rebuildDebugger(cpu.instructionPointer());
+		video.memory = memory;
+		video.reset();
+		video.rebuildDebugger();
+		for(Device d: devices)
+		{
+			d.memory = memory;
+			d.reset();
+			d.rebuildDebugger();
+		}
+	}
+
+	public void paint(Graphics g) 
+	{
 	}
 
 	//
 	// javascript methods
 	//
-	public void step()
+	public void stepButton()
 	{
-		cpu.step();
+		step();
+		cpu.rebuildDebugger();
+		video.updateDebugger();
+		for(Device d: devices)
+			d.updateDebugger();
+		memory.updateDebugger();
 	}
 
 	public void cpuPosChanged(String pos)
