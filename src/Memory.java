@@ -56,6 +56,11 @@ public class Memory
 		memoryMaps.add(new MemoryMap(init, end, device));
 	}
 
+	public void rebuildDebugger()
+	{
+		rebuildDebugger(debugPos);
+	}
+
 	public void rebuildDebugger(int pos)
 	{
 		debugPos = pos;

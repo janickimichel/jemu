@@ -47,14 +47,38 @@ function show_pia()
 		document.getElementById('pia').style.display = 'none';
 }
 
+function show_tia()
+{
+	if(document.getElementById('display_tia').checked == true)
+		document.getElementById('tia').style.display = 'block';
+	else
+		document.getElementById('tia').style.display = 'none';
+}
+
 function debug_line(decolor, color)
 {
 	c = document.getElementById('p' + color);
 	d = document.getElementById('p' + decolor);
 	for(var i=1; i<=4; i++)
 	{
-		c.cells[i].style.backgroundColor = "yellow";
-		d.cells[i].style.backgroundColor = "transparent";
+		if(color != -1)
+			c.cells[i].style.backgroundColor = "yellow";
+		if(d)
+			d.cells[i].style.backgroundColor = "transparent";
+	}
+}
+
+function set_breakpoint(row, pos)
+{
+	if(row.style.backgroundColor == "red")
+	{
+		row.style.backgroundColor = "transparent";
+		document.getElementById('JAtari').removeBreakpoint(pos);
+	}
+	else
+	{
+		row.style.backgroundColor = "red";
+		document.getElementById('JAtari').addBreakpoint(pos);
 	}
 }
 
@@ -67,17 +91,27 @@ function debug_line(decolor, color)
 
 <!-- Debuggers -->
 <p><b>Debuggers:</b>&nbsp;
-	<input type="checkbox" id="display_cpu" onclick="show_cpu()">MOS 6502 (CPU)
-	<input type="checkbox" id="display_pia" onclick="show_pia()">PIA 6532 (timer)
+	<input type="checkbox" id="display_cpu" onclick="show_cpu()">MOS 6507
+	<input type="checkbox" id="display_tia" onclick="show_tia()">TIA 1A
+	<input type="checkbox" id="display_pia" onclick="show_pia()">PIA 6532
 	<input type="checkbox" id="display_memory" onclick="show_memory()">Memory
 </p>
-<p><input id="step" type="button" value="Step" onclick="document.getElementById('JAtari').stepButton();"></p>
+<p>
+	<input id="run" type="button" value="Run" onclick="document.getElementById('JAtari').runButton();">
+	<input id="step" type="button" value="Step" onclick="document.getElementById('JAtari').stepButton();">
+</p>
 
 <!-- CPU Debugger -->
 <div id="cpu" style="display: none;">
 	<hr>
 	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JAtari').cpuPosChanged(this.value)"></p>
 	<div id="cpu_table"></div>
+</div>
+
+<!-- TIA Debugger -->
+<div id="tia" style="display: none;">
+	<hr>
+	<div id="tia_table"></div>
 </div>
 
 <!-- PIA Debugger -->
