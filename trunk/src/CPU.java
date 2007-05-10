@@ -1,4 +1,6 @@
 import netscape.javascript.JSObject;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract class CPU
 {
@@ -40,6 +42,7 @@ abstract class CPU
 	public Memory memory;
 	public int debugPos;
 	public int lastPos;
+	public List<Integer> breakpoints = new ArrayList<Integer>();
 	protected int lastInstructionPointer;
 
 	//
@@ -77,7 +80,7 @@ abstract class CPU
 
 		// opcodes
 		s += "<table border='1'><tr>";
-		s += "<th></th>";
+		s += "<th>Bkp</th>";
 		s += "<th>Address</th>";
 		s += "<th>Instruction</th>";
 		s += "<th>Opcodes</th>";
@@ -95,7 +98,7 @@ abstract class CPU
 			if(dv != null)
 			{
 				s += "<tr id='p" + bt + "'>";
-				s += "<td>&nbsp;&nbsp;&nbsp;</td>";
+				s += "<td style='cursor: pointer;' onclick='set_breakpoint(this, " + bt + ")'>&nbsp;&nbsp;&nbsp;</td>";
 				s += "<td " + color + ">$" + Integer.toHexString(bt).toUpperCase() + "</td>";
 				s += "<td " + color + "><b>" + dv.instruction + "</b></td>";
 				s += "<td " + color + ">";
@@ -104,21 +107,22 @@ abstract class CPU
 				s += "</td>";
 				s += "<td " + color + ">" + Integer.toString(dv.cycles) + "</td>";
 				s += "</tr>";
+				lastPos = bt;
 				bt += dv.n_opcodes;
 			}
 			else
 			{
 				s += "<tr>";
-				s += "<td>&nbsp;&nbsp;&nbsp;</td>";
+				s += "<td style='cursor: pointer;' onclick='set_breakpoint(this, " + bt + ")'>&nbsp;&nbsp;&nbsp;</td>";
 				s += "<td " + color + ">$" + Integer.toHexString(bt).toUpperCase() + "</td>";
 				s += "<td " + color + ">Invalid</td>";
 				s += "<td " + color + ">" + Integer.toHexString(memory.get(bt)).toUpperCase() + "</td>";
 				s += "<td " + color + ">?</td>";
 				s += "</tr>";
+				lastPos = bt;
 				bt++;
 			}
 		}
-		lastPos = bt;
 		s += "</table></td>";
 
 		// spacing

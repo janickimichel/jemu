@@ -480,7 +480,7 @@ class m6502 extends CPU
 			case 0x50: /* BVC */
 			case 0x70: /* BVS */
 				cycles = 2;
-				src = (PC + bytes_inst - (0x100 - lsrc));
+				src = (lastInstructionPointer + bytes_inst - ((0x100 - lsrc) & 0xff));
 				// src = REL_ADDR(PC, lsrc);
 				break;
 
@@ -1906,7 +1906,7 @@ class m6502 extends CPU
 				debug_opcode = "TYA";
 				break;
 		}
-		dv.instruction = debug_opcode + " " + debug_par;
+		dv.instruction = debug_opcode + " " + debug_par.toUpperCase();
 		return dv;
 	}
 

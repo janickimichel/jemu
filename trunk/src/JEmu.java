@@ -5,6 +5,9 @@ import java.io.IOException;
 
 public abstract class JEmu extends JApplet
 {
+	//
+	// fields
+	//
 	public Memory memory;
 	public CPU cpu;
 	public Video video;
@@ -38,8 +41,14 @@ public abstract class JEmu extends JApplet
 		}
 	}
 
+	public void update(Graphics g)
+	{
+		g.drawImage(video.backImage, 0, 0, this);
+	}
+
 	public void paint(Graphics g) 
 	{
+		update(g);
 	}
 
 	//
@@ -53,6 +62,41 @@ public abstract class JEmu extends JApplet
 		for(Device d: devices)
 			d.updateDebugger();
 		memory.updateDebugger();
+	}
+
+	public void runButton()
+	{
+		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
+		run.setMember("value", "Pause");
+		Object o[] = new Object[2];
+		o[0] = cpu.instructionPointer();
+		o[1] = -1;
+		JEmu.Window.call("debug_line", o);
+
+		while(true)
+		{
+			step();
+			if(cpu.breakpoints.contains(cpu.instructionPointer()))
+				break;
+		}
+		run.setMember("value", "Run");
+
+		cpu.rebuildDebugger();
+		video.rebuildDebugger();
+		for(Device d: devices)
+			d.rebuildDebugger();
+		memory.rebuildDebugger();
+	}
+
+	public void addBreakpoint(int pos)
+	{
+		if(!cpu.breakpoints.contains(pos))
+			cpu.breakpoints.add(pos);
+	}
+
+	public void removeBreakpoint(int pos)
+	{
+		cpu.breakpoints.remove(cpu.breakpoints.indexOf(pos));
 	}
 
 	public void cpuPosChanged(String pos)
