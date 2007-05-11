@@ -7,6 +7,9 @@ class TIA1A extends Video
 
 	private int x, y;
 
+	private int bgColor = 0x0;
+	private int p0Color = 0x0;
+
 	void reset()
 	{
 		x = -68;
@@ -15,6 +18,9 @@ class TIA1A extends Video
 
 	void step(int cycles)
 	{
+		int x_prev = x;
+		int y_prev = y;
+
 		// walk the electron
 		x += cycles;
 		if(x > 159)
@@ -24,11 +30,61 @@ class TIA1A extends Video
 		}
 		if(y > 260)
 			y = 0;
+
+		if(y_prev == 191 && y == 192)
+			updateScreen = true;
+
+		// memorySetAfter();
+		
+		if(y < 0 || y >= 192)
+			return;
+
+		// update screen
+		int xx;
+		if(x >= 0)
+			xx = x;
+		else
+			xx = 159;
+		if(x_prev < 0 && xx >= 0)
+			x_prev = 0;
+		if(xx < 0)
+			return;
+
+		for(int i=x_prev; i<xx; i++)
+		{
+			//pixels[i][y] = bgColor;
+			backImage.setRGB(i*2, y, bgColor);
+			backImage.setRGB(i*2+1, y, bgColor);
+		}
+	}
+
+	private void memorySetAfter()
+	{
+
 	}
 
 	public boolean memorySet(int pos, int data, int cycles)
 	{
-		return false;
+		switch(pos)
+		{
+			case COLUBK:
+				bgColor = color[data];
+				break;
+
+			case COLUP0:
+				p0Color = color[data];
+				break;
+
+			case VSYNC:
+				if((data & 0x2) > 0)
+					y = -40;
+				break;
+
+			case WSYNC:
+				step(228); // ???
+				break;
+		}
+		return true;
 	}
 
 	public boolean redraw()
@@ -39,9 +95,12 @@ class TIA1A extends Video
 	public void rebuildDebugger()
 	{
 		String s;
-		s = "<table>";
-		s += "<tr><td>x</td><td><b>" + x + "</b></td></tr>";
-		s += "<tr><td>y</td><td><b>" + y + "</b></td></tr>";
+		s = "<p>x, y = <b>" + x + ", " + y + "</b></p>";
+		s += "<table border='1'>";
+		s += "<tr>";
+		s += "<td>COLUBK</td>";
+		s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | bgColor).substring(1) + "'>&nbsp;</td>";
+		s += "</tr>";
 		s += "</table>";
 
 		JSObject tia_table = (JSObject)JEmu.Window.eval("document.getElementById('tia_table');");
