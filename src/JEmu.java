@@ -16,6 +16,8 @@ public abstract class JEmu extends JApplet implements Runnable
 
 	private boolean running = false;
 	private Thread thread = null;
+	private boolean stopOnNextScanline = false;
+	private boolean stopOnNextFrame = false;
 
 	// 
 	// abstract methods
@@ -69,7 +71,23 @@ public abstract class JEmu extends JApplet implements Runnable
 				if(cpu.breakpoints.contains(cpu.instructionPointer()))
 					bkp = true;
 				if(video.updateScreen)
+				{
 					repaint();
+					if(stopOnNextFrame)
+					{
+						repaint();
+						video.clearBackImage();
+						stopOnNextFrame = false;
+						bkp = true;
+					}
+				}
+				if(stopOnNextScanline)
+					if(video.updateLine)
+					{
+						repaint();
+						stopOnNextScanline = false;
+						bkp = true;
+					}
 			}
 		}
 
@@ -123,8 +141,7 @@ public abstract class JEmu extends JApplet implements Runnable
 	public void stepButton()
 	{
 		step();
-		if(video.updateScreen)
-			repaint();
+		repaint();
 		cpu.rebuildDebugger();
 		video.updateDebugger();
 		for(Device d: devices)
@@ -138,6 +155,22 @@ public abstract class JEmu extends JApplet implements Runnable
 			threadSuspend();
 		else
 			threadStart();
+	}
+
+	public void nextScanlineButton()
+	{
+		if(running)
+			return;
+		stopOnNextScanline = true;
+		threadStart();
+	}
+
+	public void nextFrameButton()
+	{
+		if(running)
+			return;
+		stopOnNextFrame = true;
+		threadStart();
 	}
 
 	public void addBreakpoint(int pos)
