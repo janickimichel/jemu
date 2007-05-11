@@ -39,6 +39,9 @@ class TIA1A extends Video
 		if(y < 0 || y >= 192)
 			return;
 
+		// check for line updated
+		updateLine = (y_prev != y);
+
 		// update screen
 		int xx;
 		if(x >= 0)
@@ -76,15 +79,15 @@ class TIA1A extends Video
 				break;
 
 			case VSYNC:
-				if((data & 0x2) > 0)
-					y = -40;
+//				if((data & 0x2) > 0)
+//					y = -40;
 				break;
 
 			case WSYNC:
-				step(228); // ???
+//				step(228); // ???
 				break;
 		}
-		return true;
+		return false;
 	}
 
 	public boolean redraw()
