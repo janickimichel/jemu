@@ -3,7 +3,7 @@ import javax.swing.JApplet;
 import java.awt.*;
 import java.io.IOException;
 
-public abstract class JEmu extends JApplet
+public abstract class JEmu extends JApplet implements Runnable
 {
 	//
 	// fields
@@ -13,6 +13,9 @@ public abstract class JEmu extends JApplet
 	public Video video;
 	public Device devices[];
 	public static JSObject Window = null;
+
+	private boolean running = false;
+	private Thread thread = null;
 
 	// 
 	// abstract methods
@@ -52,11 +55,76 @@ public abstract class JEmu extends JApplet
 	}
 
 	//
+	// thread methods
+	//
+	public void run()
+	{
+		boolean bkp = false;
+
+		while(running && !bkp)
+		{
+			synchronized(this)
+			{
+				step();
+				if(cpu.breakpoints.contains(cpu.instructionPointer()))
+					bkp = true;
+				if(video.updateScreen)
+					repaint();
+			}
+		}
+
+		if(bkp)
+		{
+			running = false;
+			JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
+			run.setMember("value", "Run");
+			cpu.rebuildDebugger();
+			video.rebuildDebugger();
+			for(Device d: devices)
+				d.rebuildDebugger();
+			memory.rebuildDebugger();
+		}
+	}
+
+	private void threadStart()
+	{
+		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
+		run.setMember("value", "Pause");
+		Object o[] = new Object[2];
+		o[0] = cpu.instructionPointer();
+		o[1] = -1;
+		JEmu.Window.call("debug_line", o);
+
+		running = true;
+		thread = new Thread(this);
+		thread.start();
+	}
+
+	private void threadSuspend()
+	{
+		running = false;
+		try
+		{
+			thread.join();
+		} catch(InterruptedException e) { }
+
+		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
+		run.setMember("value", "Run");
+		cpu.rebuildDebugger();
+		video.rebuildDebugger();
+		for(Device d: devices)
+			d.rebuildDebugger();
+		memory.rebuildDebugger();
+	}
+
+	//
 	// javascript methods
 	//
 	public void stepButton()
 	{
 		step();
+		if(video.updateScreen)
+			repaint();
 		cpu.rebuildDebugger();
 		video.updateDebugger();
 		for(Device d: devices)
@@ -66,26 +134,10 @@ public abstract class JEmu extends JApplet
 
 	public void runButton()
 	{
-		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
-		run.setMember("value", "Pause");
-		Object o[] = new Object[2];
-		o[0] = cpu.instructionPointer();
-		o[1] = -1;
-		JEmu.Window.call("debug_line", o);
-
-		while(true)
-		{
-			step();
-			if(cpu.breakpoints.contains(cpu.instructionPointer()))
-				break;
-		}
-		run.setMember("value", "Run");
-
-		cpu.rebuildDebugger();
-		video.rebuildDebugger();
-		for(Device d: devices)
-			d.rebuildDebugger();
-		memory.rebuildDebugger();
+		if(running)
+			threadSuspend();
+		else
+			threadStart();
 	}
 
 	public void addBreakpoint(int pos)
