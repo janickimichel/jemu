@@ -12,6 +12,7 @@ abstract class Video extends Device
 	abstract int image_w();
 	abstract int image_h();
 	abstract boolean redraw();
+	abstract void updateBuffers();
 
 	public Video()
 	{

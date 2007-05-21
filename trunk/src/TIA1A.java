@@ -2,63 +2,111 @@ import netscape.javascript.JSObject;
 
 class TIA1A extends Video
 {
+	// extended classes
+	private class Missile
+	{
+		int x = 80;
+		int speed = 0;
+		boolean enabled = false;
+
+		void move()
+		{
+			x += speed;
+			if(x > 159)
+				x = 0;
+			if(x < 0)
+				x = 159;
+		}
+	}
+
+	private class Player extends Missile
+	{
+		int color = 0x0;
+		Missile missile = new Missile();
+	}
+
+	// electron position
+	private int x, y;
+
+	// background
+	private int bgColor = 0x0;
+	private int[] bg = new int[320];
+	
+	// players
+	private Player p[] = new Player[2];
+
 	protected int image_w() { return 320; }
 	protected int image_h() { return 192; }
 
-	private int x, y;
-
-	private int bgColor = 0x0;
-	private int p0Color = 0x0;
-
-	void reset()
+	public void reset()
 	{
 		x = -68;
 		y = -40;
+		p[0] = new Player();
+		p[1] = new Player();
 	}
 
-	void step(int cycles)
+	public void updateBuffers()
 	{
-		int x_prev = x;
-		int y_prev = y;
-
-		// walk the electron
-		x += cycles;
-		if(x > 159)
+		if(y < 0 || y > 191)
+			return;
+		else if(x == -68)
+			backImage.setRGB(0, y-1, 320, 1, bg, 0, 320);
+		else if(x < 0)
+			return;
+		else
 		{
-			y += 1;
-			x -= 228;
+			backImage.setRGB(0, y, x*2, 1, bg, 0, x*2);
+			for(int i=(x*2)+2; i<320; i++)
+			{
+				bg[i] = 0xffffff;
+			}
 		}
-		if(y > 260)
-			y = 0;
+	}
 
-		if(y_prev == 191 && y == 192)
-			updateScreen = true;
+	public void step(int cycles)
+	{
+		for(int i=0; i<cycles; i++)
+		{
+			// walk the electron
+			x++;
+			if(x > 159)
+			{
+				x = -68;
+				y++;
+				if(y > 0 && y < 192)
+				{
+					updateBuffers();
+					updateLine = true;
+				}
+				if(y == 192)
+					updateScreen = true;
+				if(y > 260)
+					y = 0;
+			}
+
+			// update image
+			if(y >= 0 && y <= 191 && x >= 0)
+			{
+				bg[x*2] = bgColor;
+				bg[(x*2)+1] = bgColor;
+
+				Missile m;
+				for(int j=0; j<2; j++)
+				{
+					m = p[j].missile;
+					if(m.enabled)
+						if(m.x == x)
+						{
+							bg[x*2] = p[j].color;
+							bg[(x*2)+1] = p[j].color;
+						}
+				}
+			}
+		}
 
 		// memorySetAfter();
 		
-		if(y < 0 || y >= 192)
-			return;
-
-		// check for line updated
-		updateLine = (y_prev != y);
-
-		// update screen
-		int xx;
-		if(x >= 0)
-			xx = x;
-		else
-			xx = 159;
-		if(x_prev < 0 && xx >= 0)
-			x_prev = 0;
-		if(xx < 0)
-			return;
-
-		for(int i=x_prev; i<xx; i++)
-		{
-			//pixels[i][y] = bgColor;
-			backImage.setRGB(i*2, y, bgColor);
-			backImage.setRGB(i*2+1, y, bgColor);
-		}
 	}
 
 	private void memorySetAfter()
@@ -75,17 +123,46 @@ class TIA1A extends Video
 				break;
 
 			case COLUP0:
-				p0Color = color[data];
+				p[0].color = color[data];
 				break;
 
 			case VSYNC:
-//				if((data & 0x2) > 0)
-//					y = -40;
+				if((data & 0x2) > 0)
+				{
+					y = -40;
+					updateScreen = true;
+				}
 				break;
 
 			case WSYNC:
-//				step(228); // ???
+			{
+				int next_y;
+				if(y == 259)
+					next_y = 0;
+				else
+					next_y = y + 1;
+				while(y != next_y)
+					step(1);
 				break;
+			}
+
+			case HMM0:
+			{
+				int hmm0 = data >> 4;
+				if(hmm0 >= 1 && hmm0 <= 7)
+					p[0].missile.speed = -hmm0;
+				else if(hmm0 >= 8 && hmm0 <= 15)
+					p[0].missile.speed = (16 - hmm0);
+				else
+					p[0].missile.speed = 0;
+			}
+
+			case HMOVE:
+				p[0].missile.move();
+
+			case ENAM0:
+				p[0].missile.enabled = ((data & 0x2) != 0);
+
 		}
 		return false;
 	}
@@ -100,12 +177,32 @@ class TIA1A extends Video
 		String s;
 		s = "<p>x, y = <b>" + x + ", " + y + "</b></p>";
 		s += "<table border='1'>";
+	
+		// COLUBK
 		s += "<tr>";
 		s += "<td>COLUBK</td>";
 		s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | bgColor).substring(1) + "'>&nbsp;</td>";
 		s += "</tr>";
+
+		// Players
+		for(int i=0; i<2; i++)
+		{
+			s += "<tr>";
+			s += "<td>COLUP" + i + "</td>";
+			s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | p[i].color).substring(1) + "'>&nbsp;</td>";
+			s += "</tr>";
+		}
+
 		s += "</table>";
 
+		// Missile
+		for(int i=0; i<2; i++)
+		{
+			s += "<p><u><b>m0</b></u><br>";
+			s += "&nbsp;&nbsp;position: <b>" + p[i].missile.x + "</b><br>";
+			s += "</p>";
+		}
+	
 		JSObject tia_table = (JSObject)JEmu.Window.eval("document.getElementById('tia_table');");
 		tia_table.setMember("innerHTML", s);
 	}
