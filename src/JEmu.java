@@ -86,6 +86,7 @@ public abstract class JEmu extends JApplet implements Runnable
 					{
 						repaint();
 						stopOnNextScanline = false;
+						video.updateLine = false;
 						bkp = true;
 					}
 			}
@@ -141,6 +142,7 @@ public abstract class JEmu extends JApplet implements Runnable
 	public void stepButton()
 	{
 		step();
+		video.updateBuffers();
 		repaint();
 		cpu.rebuildDebugger();
 		video.updateDebugger();
