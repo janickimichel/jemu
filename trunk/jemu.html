@@ -1,0 +1,156 @@
+<html>
+<head>
+<title>JEmu</title>
+
+<style type="text/css">
+	a, p, th, input, div {
+		font-family: "verdana", helvetica;
+		font-size: 8pt;
+	}
+	td {
+		font-family: "lucida console", monospace;
+		font-size: 8pt;
+	}
+	td.memory {
+		text-align: center;
+	}
+	table {
+		border-collapse: collapse;
+		empty-cells: show;
+	}
+
+</style>
+
+<script type="text/javascript">
+
+function show_memory()
+{
+	if(document.getElementById('display_memory').checked == true)
+		document.getElementById('memory').style.display = 'block';
+	else
+		document.getElementById('memory').style.display = 'none';
+	document.getElementById('JEmu').rebuildDebugger(-3);
+}
+
+function show_cpu()
+{
+	if(document.getElementById('display_cpu').checked == true)
+		document.getElementById('cpu').style.display = 'block';
+	else
+		document.getElementById('cpu').style.display = 'none';
+	document.getElementById('JEmu').rebuildDebugger(-1);
+}
+
+function show_video()
+{
+	if(document.getElementById('display_video').checked == true)
+		document.getElementById('video').style.display = 'block';
+	else
+		document.getElementById('video').style.display = 'none';
+	document.getElementById('JEmu').rebuildDebugger(-2);
+}
+
+function show_device(n)
+{
+	if(document.getElementById('display_device_' + n).checked == true)
+		document.getElementById('dev' + n).style.display = 'block';
+	else
+		document.getElementById('dev' + n).style.display = 'none';
+	document.getElementById('JEmu').rebuildDebugger(n);
+}
+
+function debug_line(decolor, color)
+{
+	c = document.getElementById('p' + color);
+	d = document.getElementById('p' + decolor);
+	for(var i=1; i<=4; i++)
+	{
+		if(color != -1)
+			c.cells[i].style.backgroundColor = "yellow";
+		if(d)
+			d.cells[i].style.backgroundColor = "transparent";
+	}
+}
+
+function set_breakpoint(row, pos)
+{
+	if(row.style.backgroundColor == "red")
+	{
+		row.style.backgroundColor = "transparent";
+		document.getElementById('JEmu').removeBreakpoint(pos);
+	}
+	else
+	{
+		row.style.backgroundColor = "red";
+		document.getElementById('JEmu').addBreakpoint(pos);
+	}
+}
+
+</script>
+
+</head>
+<body>
+<p><applet id="JEmu" code="Atari2600" codebase="classes/" width=320 
+           height=192 mayscript></applet></p>
+
+<!-- Debuggers -->
+<p><b>Debuggers:</b>&nbsp;
+	<div id="cpu_bt"><input type="checkbox" id="display_cpu" onclick="show_cpu()">CPU</div>
+	<div id="video_bt"><input type="checkbox" id="display_video" onclick="show_video">Video</div>
+	<div id="dev0_bt" style="display: none;"><input type="checkbox" id="display_device_0" onclick="show_device(0)">Device</div>
+	<div id="dev1_bt" style="display: none;"><input type="checkbox" id="display_device_1" onclick="show_device(1)">Device</div>
+	<div id="dev2_bt" style="display: none;"><input type="checkbox" id="display_device_2" onclick="show_device(2)">Device</div>
+	<div id="dev3_bt" style="display: none;"><input type="checkbox" id="display_device_3" onclick="show_device(3)">Device</div>
+	<div id="memory_bt"><input type="checkbox" id="display_memory" onclick="show_memory()">Memory</div>
+</p>
+<p>
+	<input id="run" type="button" value="Run" onclick="document.getElementById('JEmu').runButton();">
+	<input id="step" type="button" value="Step" onclick="document.getElementById('JEmu').stepButton();">
+	<input id="next_scanline" type="button" value="Next Scanline" onclick="document.getElementById('JEmu').nextScanlineButton();">
+	<input id="next_frame" type="button" value="Next Frame" onclick="document.getElementById('JEmu').nextFrameButton();">
+</p>
+
+<!-- ROMS -->
+<a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/simple.bin');">Simple</a>&nbsp;
+<a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/pitfall.bin');">Pitfall</a>&nbsp;
+
+<!-- CPU Debugger -->
+<div id="cpu" style="display: none;">
+	<hr>
+	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JEmu').rebuildDebugger(-1)"></p>
+	<div id="cpu_table"></div>
+</div>
+
+<!-- Video debugger -->
+<div id="video" style="display: none;">
+	<hr>
+	<div id="video_table"></div>
+</div>
+
+<!-- Device Debuggers -->
+<div id="dev0" style="display: none;">
+	<hr>
+	<div id="dev_table_0"></div>
+</div>
+<div id="dev1" style="display: none;">
+	<hr>
+	<div id="dev_table_1"></div>
+</div>
+<div id="dev2" style="display: none;">
+	<hr>
+	<div id="dev_table_2"></div>
+</div>
+<div id="dev3" style="display: none;">
+	<hr>
+	<div id="dev_table_3"></div>
+</div>
+
+<!-- Memory Debugger -->
+<div id="memory" style="display: none;">
+	<hr>
+	<p>Initial position: $<input id="memory_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JEmu').rebuildDebugger(-3)"></p>
+	<div id="memory_table"></div>
+</div>
+
+</body>
+</html>
