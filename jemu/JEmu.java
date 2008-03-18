@@ -34,6 +34,18 @@ abstract class JEmu extends JApplet implements Runnable
 		JEmu.Window = JSObject.getWindow(this);
 		// JSObject title = (JSObject)JEmu.Window.eval("document.title");
 		// title.setMember("value", platformName());
+
+		int i = 0;
+		JSObject devs = (JSObject)JEmu.Window.eval("document.getElementById('devices');");
+		for(Device d: devices)
+		{
+			devs.setMember("innerHTML", "<input type='checkbox' id='display_device_" + i + "' onclick='show_device(0)'>" + d.name());
+			d.htmlField = "dev_table_" + i;
+			i++;
+		}
+
+		((JSObject)JEmu.Window.eval("document.getElementById('cpu_name');")).setMember("innerHTML", cpu.name());
+		((JSObject)JEmu.Window.eval("document.getElementById('video_name');")).setMember("innerHTML", video.name());
 	}
 
 	//
@@ -119,6 +131,7 @@ abstract class JEmu extends JApplet implements Runnable
 		}
 		loadROM(d);
 		System.out.println("ROM loaded.");
+		rebuildDebuggers();
 	}
 
 	void initRAM(int size)

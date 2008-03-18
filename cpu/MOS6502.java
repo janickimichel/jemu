@@ -9,6 +9,8 @@ class MOS6502 extends CPU
 	// stack pointer
 	private int SP;
 
+	public String name() { return "MOS 6502"; }
+
 	public int step()
 	{
 		int add = IP;
