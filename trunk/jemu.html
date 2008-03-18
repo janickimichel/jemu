@@ -95,13 +95,10 @@ function set_breakpoint(row, pos)
 
 <!-- Debuggers -->
 <p><b>Debuggers:</b>&nbsp;
-	<div id="cpu_bt"><input type="checkbox" id="display_cpu" onclick="show_cpu()">CPU</div>
-	<div id="video_bt"><input type="checkbox" id="display_video" onclick="show_video">Video</div>
-	<div id="dev0_bt" style="display: none;"><input type="checkbox" id="display_device_0" onclick="show_device(0)">Device</div>
-	<div id="dev1_bt" style="display: none;"><input type="checkbox" id="display_device_1" onclick="show_device(1)">Device</div>
-	<div id="dev2_bt" style="display: none;"><input type="checkbox" id="display_device_2" onclick="show_device(2)">Device</div>
-	<div id="dev3_bt" style="display: none;"><input type="checkbox" id="display_device_3" onclick="show_device(3)">Device</div>
-	<div id="memory_bt"><input type="checkbox" id="display_memory" onclick="show_memory()">Memory</div>
+	<span id="cpu_bt"><input type="checkbox" id="display_cpu" onclick="show_cpu()"><span id="cpu_name">CPU</span></span>
+	<span id="video_bt"><input type="checkbox" id="display_video" onclick="show_video"><span id="video_name">Video</span></div>
+	<span id="devices"></span>
+	<span id="memory_bt"><input type="checkbox" id="display_memory" onclick="show_memory()">Memory</span>
 </p>
 <p>
 	<input id="run" type="button" value="Run" onclick="document.getElementById('JEmu').runButton();">

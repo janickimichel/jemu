@@ -8,9 +8,18 @@ abstract class CPU
 	protected int reg[];
 	protected String flagName[];
 	protected byte flag[];
+	private int memPos[] = new int[16];
 
 	public void rebuildDebugger(int pos)
 	{
+		// must we change the reference?
+		boolean found = false;
+		for(int i=0; i<16; i++)
+			if(memPos[i] == IP)
+				found = true;
+		if(!found)
+			pos = IP;
+
 		JSObject table = (JSObject)JEmu.Window.eval("document.getElementById('cpu_table');");
 		String s = "<table><tr><td>";
 
@@ -27,6 +36,8 @@ abstract class CPU
 		{
 			String color = "", bkpColor = "";
 			int instSize = instructionSize(bt);
+
+			memPos[i] = bt;
 
 			if(bt == IP)
 				color = " style='background-color: yellow;'";
@@ -98,6 +109,7 @@ abstract class CPU
 	/*
 	 * Implement this
 	 */
+	public abstract String name();
 	public abstract int step();
 	protected abstract int instructionSize(int pos);
 	protected abstract String debugInstruction(int pos);

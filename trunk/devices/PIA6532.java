@@ -21,6 +21,8 @@ class PIA6532 extends Device
 
 	int interval = 0, timer = 0;
 
+	public String name() { return "PIA 6532"; }
+
 	public void reset()
 	{
 		interval = 0;
@@ -74,7 +76,7 @@ class PIA6532 extends Device
 		s += "<tr><td>Timer:</td><td><b>" + timer + "</b></td></tr>";
 		s += "</table>";
 
-		JSObject pia_table = (JSObject)JEmu.Window.eval("document.getElementById('pia_table');");
+		JSObject pia_table = (JSObject)JEmu.Window.eval("document.getElementById('" + htmlField + "');");
 		pia_table.setMember("innerHTML", s);
 	}
 
