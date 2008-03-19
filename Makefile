@@ -9,6 +9,7 @@ all: \
 	jemu/Device.java \
 	jemu/Video.java \
 	jemu/BreakPoints.java \
+	jemu/MemoryMaps.java \
 	\
 	platform/Atari2600.java \
 	\
