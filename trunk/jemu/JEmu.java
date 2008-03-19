@@ -3,6 +3,7 @@ import javax.swing.JApplet;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 import java.net.*;
 import java.io.*;
 
@@ -16,9 +17,11 @@ abstract class JEmu extends JApplet implements Runnable
 	public List<Device> devices = new ArrayList<Device>();
 	public static JSObject Window = null;
 	public static JEmu platform;
+	public static boolean running = false;
+
+	protected MemoryMaps memoryMaps = new MemoryMaps();
 
 	private short data[];
-	public static boolean running = false;
 	private Thread thread = null;
 
 	/*
@@ -46,6 +49,18 @@ abstract class JEmu extends JApplet implements Runnable
 
 		((JSObject)JEmu.Window.eval("document.getElementById('cpu_name');")).setMember("innerHTML", cpu.name());
 		((JSObject)JEmu.Window.eval("document.getElementById('video_name');")).setMember("innerHTML", video.name());
+
+		reset();
+	}
+
+	public void update(Graphics g)
+	{
+		g.drawImage(video.backImage, 0, 0, this);
+	}
+
+	public void paint(Graphics g) 
+	{
+		update(g);
 	}
 
 	//
@@ -53,20 +68,31 @@ abstract class JEmu extends JApplet implements Runnable
 	//
 	public void run()
 	{
-		System.out.println("Started running!");
+		long timer = ((new Date()).getTime() + (1000 / video.fps));
+
 		while(JEmu.running)
 		{
 			synchronized(this)
 			{
 				step();
+				/*
 				if(cpu.breakPoints.hasBkp())
 					if(cpu.breakPoints.contains(cpu.IP))
+					{
 						running = false;
-
-				// ...
+						video.drawScreen();
+					}
+				*/
+				if(video.screenDone)
+				{
+					video.drawScreen();
+					video.screenDone = false;
+					while(timer > (new Date()).getTime())
+						;
+					timer = ((new Date()).getTime() + (1000 / video.fps));
+				}
 			}
 		}
-		System.out.println("Stopped running!");
 
 		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
 		run.setMember("value", "Run");
@@ -145,7 +171,12 @@ abstract class JEmu extends JApplet implements Runnable
 
 	void setRAM(int pos, short d, int cycles)
 	{
-		setRAMDirect(pos, d);
+		Device dev = memoryMaps.device(pos);
+		if(dev == null)
+			setRAMDirect(pos, d);
+		else
+			if(dev.memorySet(pos, d, cycles))
+				setRAMDirect(pos, d);
 	}
 
 	void setRAMDirect(int pos, short d)
@@ -174,6 +205,7 @@ abstract class JEmu extends JApplet implements Runnable
 	{
 		step();
 		rebuildDebuggers();
+		video.drawScreen();
 	}
 
 	public void runButton()

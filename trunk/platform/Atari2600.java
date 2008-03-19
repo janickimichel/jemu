@@ -11,6 +11,10 @@ public class Atari2600 extends JEmu
 		pia6532 = new PIA6532();
 		devices.add(pia6532);
 		initRAM(64*1024);
+
+		memoryMaps.add(video, 0x0, 0x2c);
+		memoryMaps.add(pia6532, 0x80, 0xff);
+		memoryMaps.add(pia6532, 0x280, 0x297);
 	}
 
 	public void step()
@@ -43,5 +47,7 @@ public class Atari2600 extends JEmu
 	void reset()
 	{
 		cpu.IP = (getRAM(0xfffd) * 0x100) + getRAM(0xfffc);
+		video.reset();
+		pia6532.reset();
 	}
 }
