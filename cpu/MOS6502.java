@@ -344,7 +344,10 @@ class MOS6502 extends CPU
 
 	private int rel(int pos) // WARNING: returns src, not address
 	{
-		return (pos + instructionSize(pos) - ((0x100 - JEmu.platform.getRAM(pos + 1)) & 0xff));
+		if(JEmu.platform.getRAM(pos + 1) > 127)
+			return (pos + instructionSize(pos) - (0x100 - JEmu.platform.getRAM(pos + 1)));
+		else
+			return (pos + instructionSize(pos) + JEmu.platform.getRAM(pos + 1));
 	}
 
 	private int ind(int pos)
@@ -1242,7 +1245,10 @@ class MOS6502 extends CPU
 			case 0x10: /* BPL */
 			case 0x50: /* BVC */
 			case 0x70: /* BVS */
-				debug_par = "$" + Integer.toHexString(pos + instSize - (0x100 - lsrc));
+				if(lsrc < 127)
+					debug_par = "$" + Integer.toHexString(pos + instSize + lsrc);
+				else
+					debug_par = "$" + Integer.toHexString(pos + instSize - (0x100 - lsrc));
 				break;
 
 			/* Indirect: it takes the byte that's into the given
@@ -2079,7 +2085,10 @@ class MOS6502 extends CPU
 			case 0x10: /* BPL */
 			case 0x50: /* BVC */
 			case 0x70: /* BVS */
-				src = (pos + instSize - ((0x100 - lsrc) & 0xff));
+				if(lsrc < 127)
+					src = (pos + instSize + lsrc);
+				else
+					src = (pos + instSize - ((0x100 - lsrc) & 0xff));
 				break;
 
 			/* Indirect: it takes the byte that's into the given
