@@ -75,14 +75,16 @@ abstract class JEmu extends JApplet implements Runnable
 			synchronized(this)
 			{
 				step();
-				/*
+				
+				// check for breakpoints
 				if(cpu.breakPoints.hasBkp())
 					if(cpu.breakPoints.contains(cpu.IP))
 					{
 						running = false;
 						video.drawScreen();
 					}
-				*/
+				
+				// check if needs to update screen
 				if(video.screenDone)
 				{
 					video.drawScreen();

@@ -7,6 +7,7 @@ class TIA1A extends Video
 	{
 		int x = 80;
 		int speed = 0;
+		int size = 1;
 		boolean enabled = false;
 
 		void move()
@@ -50,6 +51,7 @@ class TIA1A extends Video
 
 		p[0].missile.x = p[1].missile.x = 80;
 		p[0].missile.speed = p[1].missile.speed = 0;
+		p[0].missile.size = p[1].missile.size = 1;
 	}
 	
 	public void step(int cycles)
@@ -61,8 +63,11 @@ class TIA1A extends Video
 			{
 				int color = bgColor;
 
-				if(p[0].missile.x == x && p[0].missile.enabled)
-					color = p[0].color;
+				if(p[0].missile.enabled)
+				{
+					if(x >= p[0].missile.x && x < (p[0].missile.x + p[0].missile.size))
+						color = p[0].color;
+				}
 				
 				image.setRGB(x*2, y, color);
 				image.setRGB(x*2+1, y, color);
@@ -88,14 +93,9 @@ class TIA1A extends Video
 	{
 		switch(pos)
 		{
-			case COLUBK:
-				bgColor = color[data];
-				break;
-
-			case COLUP0:
-				p[0].color = color[data];
-				break;
-
+			/*
+			 * TV Set
+			 */
 			case VSYNC:
 				if((data & 0x2) > 0)
 				{
@@ -117,6 +117,55 @@ class TIA1A extends Video
 			}
 			break;
 
+			/*
+			 * Background
+			 */
+			case COLUBK:
+				bgColor = color[data];
+				break;
+
+			/*
+			 * Player
+			 */
+			case COLUP0:
+				p[0].color = color[data];
+				break;
+
+			case COLUP1:
+				p[1].color = color[data];
+				break;
+
+			case NUSIZ0:
+				{
+					// TODO - player
+					int j = 1, i = (data >> 4) & 0x3;
+					switch(i)
+					{
+						case 0: j = 1; break;
+						case 1: j = 2; break;
+						case 2: j = 4; break;
+						case 3: j = 8; break;
+					}
+					p[0].missile.size = j;
+				}
+
+			case NUSIZ1:
+				{
+					// TODO - player
+					int j = 1, i = (data >> 4) & 0x3;
+					switch(i)
+					{
+						case 0: j = 1; break;
+						case 1: j = 2; break;
+						case 2: j = 4; break;
+						case 3: j = 8; break;
+					}
+					p[1].missile.size = j;
+				}
+
+			/*
+			 * Missile
+			 */
 			case HMM0:
 			{
 				int hmm0 = data >> 4;
@@ -129,12 +178,28 @@ class TIA1A extends Video
 			}
 			break;
 
+			case HMM1:
+			{
+				int hmm1 = data >> 4;
+				if(hmm1 >= 1 && hmm1 <= 7)
+					p[1].missile.speed = -hmm1;
+				else if(hmm1 >= 8 && hmm1 <= 15)
+					p[1].missile.speed = (16 - hmm1);
+				else
+					p[1].missile.speed = 0;
+			}
+			break;
+
 			case HMOVE:
 				p[0].missile.move();
 				break;
 
 			case ENAM0:
 				p[0].missile.enabled = ((data & 0x2) != 0);
+				break;
+
+			case ENAM1:
+				p[1].missile.enabled = ((data & 0x2) != 0);
 				break;
 		}
 		return false;
