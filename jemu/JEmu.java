@@ -55,7 +55,7 @@ abstract class JEmu extends JApplet implements Runnable
 
 	public void update(Graphics g)
 	{
-		g.drawImage(video.backImage, 0, 0, this);
+		g.drawImage(video.image, 0, 0, this);
 	}
 
 	public void paint(Graphics g) 
@@ -120,15 +120,16 @@ abstract class JEmu extends JApplet implements Runnable
 	private void threadSuspend()
 	{
 		JEmu.running = false;
+		/*
 		try
 		{
 			thread.join();
-			/*
+			///*
 			JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
 			run.setMember("value", "Run");
 			rebuildDebuggers();
-			*/
-		} catch(InterruptedException e) { }
+			//
+		} catch(InterruptedException e) { } */
 	}
 
 
@@ -174,6 +175,7 @@ abstract class JEmu extends JApplet implements Runnable
 	void setRAM(int pos, short d, int cycles)
 	{
 		Device dev = memoryMaps.device(pos);
+		d = (short)(d & 0xff);
 		if(dev == null)
 			setRAMDirect(pos, d);
 		else
@@ -183,7 +185,7 @@ abstract class JEmu extends JApplet implements Runnable
 
 	void setRAMDirect(int pos, short d)
 	{
-		data[pos] = (short)(d & 0xFF);
+		data[pos] = d;
 	}
 
 	void setRAM(int pos, int d, int cycles)

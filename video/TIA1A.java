@@ -2,33 +2,50 @@ import netscape.javascript.JSObject;
 
 class TIA1A extends Video
 {
-	// extended classes
-	private class Missile
+	//
+	// Extended classes
+	//
+	private abstract class Sprite
 	{
-		int x = 80;
-		int speed = 0;
-		int size = 1;
-		boolean enabled = false;
+		int[] pixels = new int[160];
+		int color;
 
-		void move()
+		abstract void reset();
+		abstract void prepare(int x);
+	};
+
+	private class Background extends Sprite
+	{
+		void reset()
 		{
-			x += speed;
-			if(x > 159)
-				x = 0;
-			if(x < 0)
-				x = 159;
+			color = 0x0;
+			for(int i=x<0 ? 0 : x; i<160; i++)
+				this.pixels[i] = 0x0;
 		}
-	}
 
-	private class Player extends Missile
-	{
-		int color = 0x0;
-		Missile missile = new Missile();
-	}
+		void prepare(int x)
+		{
+			for(int i=x<0 ? 0 : x; i<160; i++)
+				this.pixels[i] = color;
+		}
+	};
 
+	//
+	// Electron
+	//
 	private int x, y;
-	private int bgColor = 0;
-	private Player p[] = new Player[2];
+	private boolean lastWasSync = false;
+
+	//
+	// Sprites
+	//
+	private Background background = new Background();
+
+	// 
+	// Memory
+	//
+	int posAfter;
+	short dataAfter;
 
 	public String name() { return "TIA 1A"; }
 	public int height() { return 192; }
@@ -37,8 +54,6 @@ class TIA1A extends Video
 	public TIA1A()
 	{
 		super(60);
-		p[0] = new Player();
-		p[1] = new Player();
 	}
 
 	public void reset()
@@ -46,51 +61,58 @@ class TIA1A extends Video
 		x = -68;
 		y = -40;
 
-		p[0].x = p[1].x = 80;
-		p[0].speed = p[1].speed = 0;
+		background.reset();
+	}
 
-		p[0].missile.x = p[1].missile.x = 80;
-		p[0].missile.speed = p[1].missile.speed = 0;
-		p[0].missile.size = p[1].missile.size = 1;
+	private void draw()
+	{
+		for(int i=0; i<160; i++)
+		{
+			int color;
+
+			color = background.pixels[i];
+			pixels[(y * width()) + (i*2)] = 0xff000000 | color;
+			pixels[(y * width()) + (i*2+1)] = 0xff000000 | color;
+		}
 	}
 	
 	public void step(int cycles)
 	{
-		for(int i=0; i<cycles; i++)
+		if(lastWasSync)
 		{
-			// draw
-			if(x >= 0 && y >= 0 && y < 192)
-			{
-				int color = bgColor;
-
-				if(p[0].missile.enabled)
-				{
-					if(x >= p[0].missile.x && x < (p[0].missile.x + p[0].missile.size))
-						color = p[0].color;
-				}
-				
-				image.setRGB(x*2, y, color);
-				image.setRGB(x*2+1, y, color);
-			}
-
-			x++;
-			if(x > 159)
-			{
-				scanlineDone = true;
-				x = -68;
-				y++;
-				if(y == 192)
-					screenDone = true;
-				else if(y == 40)
-					screenBegin = true;
-				else if(y == 260)
-					y = 0;
-			}
+			lastWasSync = false;
+			return;
 		}
-	}
+
+		x += (cycles * 3);
+
+		if(x > 159)
+		{
+			x = -68 + (x - 160);
+
+			if(y >= 0 && y < 192)
+				draw();
+			y++;
+			
+			if(y >= 0 && y < 192)
+				background.prepare(0);
+
+			if(y == 192)
+				screenDone = true;
+			else if(y == 40)
+				screenBegin = true;
+			else if(y == 260)
+				y = 0;
+		}
 	
-	public boolean memorySet(int pos, short data, int cycles) 
+		if(posAfter != -1)
+			memorySetAfter(posAfter, dataAfter, 0);
+	}
+
+	public boolean memorySet(int pos, short data, int cycles)
 	{
+		posAfter = -1;
+
 		switch(pos)
 		{
 			/*
@@ -102,31 +124,54 @@ class TIA1A extends Video
 					x = -68;
 					y = -40;
 					screenDone = true;
+					lastWasSync = true;
 				}
 				break;
 
 			case WSYNC:
-			{
-				int next_y;
-				if(y == 259)
-					next_y = 0;
-				else
-					next_y = y + 1;
-				while(y != next_y)
-					step(1);
-			}
-			break;
+				x = -68;
 
+				if(y >= 0 && y < 192)
+					draw();
+				y++;
+
+				if(y >= 0 && y < 192)
+					background.prepare(0);
+
+				if(y == 192)
+					screenDone = true;
+				else if(y == 40)
+					screenBegin = true;
+				else if(y == 260)
+					y = 0;
+				lastWasSync = true;
+				break;
+
+			default:
+				posAfter = pos;
+				dataAfter = data;
+		}
+		return false;
+	}
+	
+	public void memorySetAfter(int pos, short data, int cycles) 
+	{
+		posAfter = -1; // avoids infinite loop
+
+		switch(pos)
+		{
 			/*
 			 * Background
 			 */
 			case COLUBK:
-				bgColor = color[data];
+				background.color = color[data];
+				background.prepare(x);
 				break;
 
 			/*
 			 * Player
 			 */
+			/*
 			case COLUP0:
 				p[0].color = color[data];
 				break;
@@ -162,10 +207,12 @@ class TIA1A extends Video
 					}
 					p[1].missile.size = j;
 				}
+			*/
 
 			/*
 			 * Missile
 			 */
+			/*
 			case HMM0:
 			{
 				int hmm0 = data >> 4;
@@ -201,8 +248,8 @@ class TIA1A extends Video
 			case ENAM1:
 				p[1].missile.enabled = ((data & 0x2) != 0);
 				break;
+			*/
 		}
-		return false;
 	}
 
 	public void rebuildDebugger()
@@ -215,9 +262,13 @@ class TIA1A extends Video
 		// COLUBK
 		s += "<tr>";
 		s += "<td>COLUBK</td>";
-		s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | bgColor).substring(1) + "'>&nbsp;</td>";
+		s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | background.color).substring(1) + "'>&nbsp;&nbsp;&nbsp;</td>";
+		for(int i=0; i<256; i++)
+			if(color[i] == background.color)
+				s += "<td>" + i + "</td>";
 		s += "</tr>";
 
+		/*
 		// Players
 		for(int i=0; i<2; i++)
 		{
@@ -235,7 +286,7 @@ class TIA1A extends Video
 			s += "<td>" + p[0].missile.x + "</td>";
 			s += "</tr>";
 		}
-
+		*/
 
 		s += "</table>";
 
