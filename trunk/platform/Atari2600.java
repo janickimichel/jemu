@@ -21,8 +21,8 @@ public class Atari2600 extends JEmu
 	{
 		int cycles = cpu.step();
 		video.step(cycles);
-		video.step(cycles);
-		video.step(cycles);
+		// video.step(cycles);
+		// video.step(cycles);
 		pia6532.step(cycles);
 	}
 

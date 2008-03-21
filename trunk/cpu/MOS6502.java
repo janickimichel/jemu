@@ -260,9 +260,9 @@ class MOS6502 extends CPU
 			case 0x8E: cycles = 4; STX(abs(IP), cycles); break;
 
 		    // STY (store Y in memory)
-			case 0x84: cycles = 3; STX(zpa(IP), cycles); break;
-			case 0x94: cycles = 4; STX(zpx(IP), cycles); break;
-			case 0x8C: cycles = 4; STX(abs(IP), cycles); break;
+			case 0x84: cycles = 3; STY(zpa(IP), cycles); break;
+			case 0x94: cycles = 4; STY(zpx(IP), cycles); break;
+			case 0x8C: cycles = 4; STY(abs(IP), cycles); break;
 			
 			// TAX (transfer A into X)
 			case 0xAA: cycles = 2; TAX(); break;

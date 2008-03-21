@@ -1,47 +1,45 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.MemoryImageSource;
+import java.awt.image.*;
 
 abstract class Video extends Device
 {
 	public boolean scanlineDone = false;
 	public boolean screenDone = false;
 	public boolean screenBegin = false;
-	public BufferedImage backImage;
 	public int fps;
 
-	protected BufferedImage image;
+	public BufferedImage image;
+
+	protected int[] pixels;
 
 	public Video(int fps)
 	{
 		this.fps = fps;
 
-	    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    	GraphicsDevice gs = ge.getDefaultScreenDevice();
-	    GraphicsConfiguration gc = gs.getDefaultConfiguration();
-    
-    	// Create an image that does not support transparency
-	    image = gc.createCompatibleImage(width(), height(), Transparency.OPAQUE);
-		Graphics g = image.createGraphics();
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, width(), height());
+		image = new BufferedImage(width(), height(), BufferedImage.TYPE_INT_ARGB);
 
-		backImage = gc.createCompatibleImage(width(), height(), Transparency.OPAQUE);
-		
+		WritableRaster wr = image.getRaster();
+		DataBuffer db = (DataBuffer)wr.getDataBuffer();
+		DataBufferInt dbi = (DataBufferInt)db;
+		pixels = dbi.getData();
+
+		for(int i=0; i<(width()*height()); i++)
+			pixels[i] = 0xff000000;
+
 		drawScreen();
 	}
 
 	public void clearScreen()
 	{
-		Graphics g = image.createGraphics();
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, width(), height());
+		for(int i=0; i<(width()*height()); i++)
+			pixels[i] = 0xff000000;
 		drawScreen();
 	}
 
 	public void drawScreen()
 	{
-		Graphics g = backImage.createGraphics();
-		g.drawImage(image, 0, 0, null);
 		JEmu.platform.repaint();
 	}
 
