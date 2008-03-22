@@ -9,6 +9,7 @@ class TIA1A extends Video
 	{
 		int[] pixels = new int[160];
 		int color;
+		boolean enabled;
 
 		abstract void reset();
 		abstract void prepare(int x);
@@ -30,6 +31,64 @@ class TIA1A extends Video
 		}
 	};
 
+	private class Playfield extends Sprite
+	{
+		boolean reflect;
+		boolean score;
+		boolean priority;
+
+		boolean[] pf = new boolean[20];
+
+		void reset()
+		{
+			enabled = false;
+			for(int i=x<0 ? 0 : x; i<160; i++)
+				this.pixels[i] = -1;
+		}
+		
+		void prepare(int x)
+		{
+			int cl1, cl2;
+
+			if(!score)
+				cl1 = cl2 = color;
+			else
+			{
+				cl1 = cl2 = color; // TODO
+				// cl1 = player[0].color;
+				// cl1 = player[1].color;
+			}
+
+			for(int i=x<0 ? 0 : x; i<160; i++)
+			{
+				if(i<80)
+				{
+					if(pf[(int)(i/4)])
+						this.pixels[i] = color;
+					else
+						this.pixels[i] = -1;
+				}
+				else
+				{
+					if(!reflect)
+					{
+						if(pf[(int)((i-80)/4)])
+							this.pixels[i] = color;
+						else
+							this.pixels[i] = -1;
+					}
+					else
+					{
+						if(pf[19-(int)((i-80)/4)])
+							this.pixels[i] = color;
+						else
+							this.pixels[i] = -1;
+					}
+				}
+			}
+		}
+	}
+
 	//
 	// Electron
 	//
@@ -40,6 +99,7 @@ class TIA1A extends Video
 	// Sprites
 	//
 	private Background background = new Background();
+	private Playfield playfield = new Playfield();
 
 	// 
 	// Memory
@@ -71,6 +131,9 @@ class TIA1A extends Video
 			int color;
 
 			color = background.pixels[i];
+			if(playfield.pixels[i] != -1)
+				color = playfield.pixels[i];
+
 			pixels[(y * width()) + (i*2)] = 0xff000000 | color;
 			pixels[(y * width()) + (i*2+1)] = 0xff000000 | color;
 		}
@@ -167,6 +230,41 @@ class TIA1A extends Video
 				background.color = color[data];
 				background.prepare(x);
 				break;
+
+			/* 
+			 * Playfield
+			 */
+			case COLUPF:
+				playfield.color = color[data];
+				playfield.prepare(x);
+				break;
+
+			case CTRLPF:
+				playfield.reflect = (data & 0x1) > 0 ? true : false;
+				playfield.score = (data & 0x2) > 0 ? true : false;
+				playfield.priority = (data & 0x4) > 0 ? true : false;
+				// ball.size = (data & 0x30) >> 5;
+				playfield.prepare(x);
+				break;
+
+			case PF0: /* Playfield graphics 0 */
+				for(int i=4; i<8; i++)
+					playfield.pf[i-4] = (data & (1 << i)) >> i > 0;
+				playfield.prepare(x);
+				break;
+	
+			case PF1: /* Playfield graphics 1 */
+				for(int i=0; i<8; i++)
+					playfield.pf[i+4] = (data & (0x80 >> i)) != 0;
+				playfield.prepare(x);
+				break;
+
+			case PF2: /* Playfield graphics 2 */
+				for(int i=0; i<8; i++)
+					playfield.pf[i+12] = (data & (1 << i)) >> i > 0;
+				playfield.prepare(x);
+				break;
+
 
 			/*
 			 * Player
