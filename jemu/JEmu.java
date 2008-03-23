@@ -70,28 +70,50 @@ abstract class JEmu extends JApplet implements Runnable
 	{
 		long timer = ((new Date()).getTime() + (1000 / video.fps));
 
-		while(JEmu.running)
+		if(cpu.breakPoints.hasBkp())
 		{
-			synchronized(this)
+			while(JEmu.running)
 			{
-				step();
-				
-				// check for breakpoints
-				if(cpu.breakPoints.hasBkp())
+				synchronized(this)
+				{
+					step();
+					
+					// check for breakpoints
 					if(cpu.breakPoints.contains(cpu.IP))
 					{
 						running = false;
 						video.drawScreen();
 					}
 				
-				// check if needs to update screen
-				if(video.screenDone)
+					// check if needs to update screen
+					if(video.screenDone)
+					{
+						video.drawScreen();
+						video.screenDone = false;
+						while(timer > (new Date()).getTime())
+							;
+						timer = ((new Date()).getTime() + (1000 / video.fps));
+					}
+				}
+			}
+		}
+		else /* no breakpoints */
+		{
+			while(JEmu.running)
+			{
+				synchronized(this)
 				{
-					video.drawScreen();
-					video.screenDone = false;
-					while(timer > (new Date()).getTime())
-						;
-					timer = ((new Date()).getTime() + (1000 / video.fps));
+					step();
+					
+					// check if needs to update screen
+					if(video.screenDone)
+					{
+						video.drawScreen();
+						video.screenDone = false;
+						while(timer > (new Date()).getTime())
+							;
+						timer = ((new Date()).getTime() + (1000 / video.fps));
+					}
 				}
 			}
 		}

@@ -3,34 +3,50 @@ import netscape.javascript.JSObject;
 class TIA1A extends Video
 {
 	//
-	// Extended classes
+	// Helper functions
+	//
+	int adjust(int i)
+	{
+		if(i >=0 && i < 160)
+			return i;
+		if(i < 0)
+			return 160 + i;
+		else //if(i >= 192)
+			return i - 160;
+	}
+
+	//
+	// Extended classe - Sprite
 	//
 	private abstract class Sprite
 	{
-		int[] pixels = new int[160];
 		int color;
 		boolean enabled;
 
 		abstract void reset();
-		abstract void prepare(int x);
+		abstract void draw(int x1, int x2);
 	};
 
+	//
+	// Background
+	//
 	private class Background extends Sprite
 	{
 		void reset()
 		{
 			color = 0x0;
-			for(int i=x<0 ? 0 : x; i<160; i++)
-				this.pixels[i] = 0x0;
 		}
 
-		void prepare(int x)
+		void draw(int x1, int x2)
 		{
-			for(int i=x<0 ? 0 : x; i<160; i++)
-				this.pixels[i] = color;
+			for(int i = x1; i < x2; i++)
+				setPixel(i, y, color);
 		}
 	};
 
+	// 
+	// Playfield
+	//
 	private class Playfield extends Sprite
 	{
 		boolean reflect;
@@ -42,11 +58,24 @@ class TIA1A extends Video
 		void reset()
 		{
 			enabled = false;
-			for(int i=x<0 ? 0 : x; i<160; i++)
-				this.pixels[i] = -1;
+			reflect = false;
+			score = false;
+			for(int i=0; i<20; i++)
+				pf[i] = false;
+		}
+
+		void checkEnabled()
+		{
+			for(int i=0; i<20; i++)
+				if(pf[i])
+				{
+					enabled = true;
+					return;
+				}
+			enabled = false;
 		}
 		
-		void prepare(int x)
+		void draw(int x1, int x2)
 		{
 			int cl1, cl2;
 
@@ -59,33 +88,87 @@ class TIA1A extends Video
 				// cl1 = player[1].color;
 			}
 
-			for(int i=x<0 ? 0 : x; i<160; i++)
+			for(int i = x1; i < x2; i++)
 			{
-				if(i<80)
+				if(i < 80)
 				{
 					if(pf[(int)(i/4)])
-						this.pixels[i] = color;
-					else
-						this.pixels[i] = -1;
+						setPixel(i, y, color);
 				}
 				else
 				{
 					if(!reflect)
 					{
 						if(pf[(int)((i-80)/4)])
-							this.pixels[i] = color;
-						else
-							this.pixels[i] = -1;
+							setPixel(i, y, color);
 					}
 					else
 					{
 						if(pf[19-(int)((i-80)/4)])
-							this.pixels[i] = color;
-						else
-							this.pixels[i] = -1;
+							setPixel(i, y, color);
 					}
 				}
 			}
+		}
+	}
+
+	//
+	// Missile
+	//
+	class Missile extends Sprite
+	{
+		private int n;
+		protected Missile() {}
+		Missile(int n) { this.n = n; }
+
+		protected int size;
+		protected int pos;
+		private boolean[] pixel = new boolean[160];
+		int speed;
+
+		void reset()
+		{
+			size = 1;
+			pos = 80;
+			speed = 0;
+			for(int i=0; i<160; i++)
+				pixel[i] = false;
+		}
+
+		void setSize(int i)
+		{
+			size = i;
+			redraw();
+		}
+
+		void move()
+		{
+			pos += speed;
+			pos = adjust(pos);
+			redraw();
+		}
+
+		void redraw()
+		{
+			for(int i = 0; i < 160; i++)
+				pixel[i] = (i == pos);
+		}
+
+		void draw(int x1, int x2)
+		{
+			for(int i = x1; i < x2; i++)
+				if(pixel[i])
+					setPixel(i, y, p[n].color);
+		}
+	}
+
+	// 
+	// Player
+	//
+	private class Player extends Missile
+	{
+		void draw(int x1, int x2)
+		{
 		}
 	}
 
@@ -100,6 +183,8 @@ class TIA1A extends Video
 	//
 	private Background background = new Background();
 	private Playfield playfield = new Playfield();
+	private Missile[] m = new Missile[2];
+	private Player[] p = new Player[2];
 
 	// 
 	// Memory
@@ -114,6 +199,10 @@ class TIA1A extends Video
 	public TIA1A()
 	{
 		super(60);
+		m[0] = new Missile(0);
+		m[1] = new Missile(1);
+		p[0] = new Player();
+		p[1] = new Player();
 	}
 
 	public void reset()
@@ -122,20 +211,31 @@ class TIA1A extends Video
 		y = -40;
 
 		background.reset();
+		playfield.reset();
+		m[0].reset();
+		m[1].reset();
+		p[0].reset();
+		p[1].reset();
+		// ball.reset();
 	}
 
-	private void draw()
+	private void setPixel(int xx, int yy, int color)
 	{
-		for(int i=0; i<160; i++)
+		pixels[(yy*width() + (xx * 2))] = 0xff000000 | color;
+		pixels[(yy*width() + (xx * 2 + 1))] = 0xff000000 | color;
+	}
+
+	private void draw(int x1, int x2)
+	{
+		if(y >= 0 && y < 192)
 		{
-			int color;
-
-			color = background.pixels[i];
-			if(playfield.pixels[i] != -1)
-				color = playfield.pixels[i];
-
-			pixels[(y * width()) + (i*2)] = 0xff000000 | color;
-			pixels[(y * width()) + (i*2+1)] = 0xff000000 | color;
+			background.draw(x1, x2);
+			if(playfield.enabled)
+				playfield.draw(x1, x2);
+			if(m[1].enabled)
+				m[1].draw(x1, x2);
+			if(m[0].enabled)
+				m[0].draw(x1, x2);
 		}
 	}
 	
@@ -147,18 +247,17 @@ class TIA1A extends Video
 			return;
 		}
 
+		// draw
+		int x1 = x < 0 ? 0 : x;
+		int x2 = x + (cycles * 3) > 160 ? 160 : x + (cycles * 3);
+		draw(x1, x2);
+
 		x += (cycles * 3);
 
 		if(x > 159)
 		{
 			x = -68 + (x - 160);
-
-			if(y >= 0 && y < 192)
-				draw();
 			y++;
-			
-			if(y >= 0 && y < 192)
-				background.prepare(0);
 
 			if(y == 192)
 				screenDone = true;
@@ -192,14 +291,9 @@ class TIA1A extends Video
 				break;
 
 			case WSYNC:
+				draw(x<0 ? 0 : x, 160);
 				x = -68;
-
-				if(y >= 0 && y < 192)
-					draw();
 				y++;
-
-				if(y >= 0 && y < 192)
-					background.prepare(0);
 
 				if(y == 192)
 					screenDone = true;
@@ -223,20 +317,18 @@ class TIA1A extends Video
 
 		switch(pos)
 		{
-			/*
-			 * Background
-			 */
+			//
+			// Background
+			//
 			case COLUBK:
 				background.color = color[data];
-				background.prepare(x);
 				break;
 
-			/* 
-			 * Playfield
-			 */
+			// 
+			// Playfield
+			//
 			case COLUPF:
 				playfield.color = color[data];
-				playfield.prepare(x);
 				break;
 
 			case CTRLPF:
@@ -244,32 +336,30 @@ class TIA1A extends Video
 				playfield.score = (data & 0x2) > 0 ? true : false;
 				playfield.priority = (data & 0x4) > 0 ? true : false;
 				// ball.size = (data & 0x30) >> 5;
-				playfield.prepare(x);
 				break;
 
 			case PF0: /* Playfield graphics 0 */
 				for(int i=4; i<8; i++)
 					playfield.pf[i-4] = (data & (1 << i)) >> i > 0;
-				playfield.prepare(x);
+				playfield.checkEnabled();
 				break;
 	
 			case PF1: /* Playfield graphics 1 */
 				for(int i=0; i<8; i++)
 					playfield.pf[i+4] = (data & (0x80 >> i)) != 0;
-				playfield.prepare(x);
+				playfield.checkEnabled();
 				break;
 
 			case PF2: /* Playfield graphics 2 */
 				for(int i=0; i<8; i++)
 					playfield.pf[i+12] = (data & (1 << i)) >> i > 0;
-				playfield.prepare(x);
+				playfield.checkEnabled();
 				break;
 
 
-			/*
-			 * Player
-			 */
-			/*
+			//
+			// Player
+			//
 			case COLUP0:
 				p[0].color = color[data];
 				break;
@@ -289,8 +379,9 @@ class TIA1A extends Video
 						case 2: j = 4; break;
 						case 3: j = 8; break;
 					}
-					p[0].missile.size = j;
+					m[0].setSize(j);
 				}
+				break;
 
 			case NUSIZ1:
 				{
@@ -303,23 +394,22 @@ class TIA1A extends Video
 						case 2: j = 4; break;
 						case 3: j = 8; break;
 					}
-					p[1].missile.size = j;
+					m[1].setSize(j);
 				}
-			*/
+				break;
 
-			/*
-			 * Missile
-			 */
-			/*
+			//
+			// Missile
+			//
 			case HMM0:
 			{
 				int hmm0 = data >> 4;
 				if(hmm0 >= 1 && hmm0 <= 7)
-					p[0].missile.speed = -hmm0;
+					m[0].speed = -hmm0;
 				else if(hmm0 >= 8 && hmm0 <= 15)
-					p[0].missile.speed = (16 - hmm0);
+					m[0].speed = (16 - hmm0);
 				else
-					p[0].missile.speed = 0;
+					m[0].speed = 0;
 			}
 			break;
 
@@ -327,26 +417,25 @@ class TIA1A extends Video
 			{
 				int hmm1 = data >> 4;
 				if(hmm1 >= 1 && hmm1 <= 7)
-					p[1].missile.speed = -hmm1;
+					m[1].speed = -hmm1;
 				else if(hmm1 >= 8 && hmm1 <= 15)
-					p[1].missile.speed = (16 - hmm1);
+					m[1].speed = (16 - hmm1);
 				else
-					p[1].missile.speed = 0;
+					m[1].speed = 0;
 			}
 			break;
 
 			case HMOVE:
-				p[0].missile.move();
+				m[0].move();
 				break;
 
 			case ENAM0:
-				p[0].missile.enabled = ((data & 0x2) != 0);
+				m[0].enabled = ((data & 0x2) != 0);
 				break;
 
 			case ENAM1:
-				p[1].missile.enabled = ((data & 0x2) != 0);
+				m[1].enabled = ((data & 0x2) != 0);
 				break;
-			*/
 		}
 	}
 
