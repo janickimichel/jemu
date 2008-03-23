@@ -47,6 +47,7 @@ public class Atari2600 extends JEmu
 	void reset()
 	{
 		cpu.IP = (getRAM(0xfffd) * 0x100) + getRAM(0xfffc);
+		// cpu.reset();
 		video.reset();
 		pia6532.reset();
 	}
