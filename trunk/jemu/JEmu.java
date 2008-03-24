@@ -18,11 +18,15 @@ abstract class JEmu extends JApplet implements Runnable
 	public static JSObject Window = null;
 	public static JEmu platform;
 	public static boolean running = false;
+	private double time;
+	private long frames;
 
 	protected MemoryMaps memoryMaps = new MemoryMaps();
 
 	private short data[];
 	private Thread thread = null;
+
+	public static boolean painting = false;
 
 	/*
 	 * Applet methods
@@ -30,37 +34,83 @@ abstract class JEmu extends JApplet implements Runnable
 	public JEmu()
 	{
 		JEmu.platform = this;
+		frames = 0;
 	}
 
 	public void start()
 	{
-		JEmu.Window = JSObject.getWindow(this);
-		// JSObject title = (JSObject)JEmu.Window.eval("document.title");
-		// title.setMember("value", platformName());
-
-		int i = 0;
-		JSObject devs = (JSObject)JEmu.Window.eval("document.getElementById('devices');");
-		for(Device d: devices)
+		try
 		{
-			devs.setMember("innerHTML", "<input type='checkbox' id='display_device_" + i + "' onclick='show_device(0)'>" + d.name());
-			d.htmlField = "dev_table_" + i;
-			i++;
+			JEmu.Window = JSObject.getWindow(this);
+			// JSObject title = (JSObject)JEmu.Window.eval("document.title");
+			// title.setMember("value", platformName());
+
+			int i = 0;
+			JSObject devs;
+		   	devs = (JSObject)JEmu.Window.eval("document.getElementById('devices');");
+
+			for(Device d: devices)
+			{
+				devs.setMember("innerHTML", "<input type='checkbox' id='display_device_" + i + "' onclick='show_device(0)'>" + d.name());
+				d.htmlField = "dev_table_" + i;
+				i++;
+			}
+
+			((JSObject)JEmu.Window.eval("document.getElementById('cpu_name');")).setMember("innerHTML", cpu.name());
+			((JSObject)JEmu.Window.eval("document.getElementById('video_name');")).setMember("innerHTML", video.name());
+		}
+		catch(netscape.javascript.JSException e)
+		{
 		}
 
-		((JSObject)JEmu.Window.eval("document.getElementById('cpu_name');")).setMember("innerHTML", cpu.name());
-		((JSObject)JEmu.Window.eval("document.getElementById('video_name');")).setMember("innerHTML", video.name());
-
+		loadROM("rom/atari2600/simple.bin");
 		reset();
+		runButton();
 	}
 
 	public void update(Graphics g)
 	{
-		g.drawImage(video.image, 0, 0, this);
+		// g.drawImage(video.image, 0, 0, this);
+		// g.drawImage(video.image, 0, 0, this);
+		paint(g);
 	}
 
 	public void paint(Graphics g) 
 	{
-		update(g);
+		// update(g);
+		Graphics bufG = video.backImage.getGraphics();
+		bufG.drawImage(video.image, 0, 0, null);
+		bufG.dispose();
+		
+		g.drawImage(video.backImage, 0, 0, this);
+	}
+
+	public boolean imageUpdate(Image im, 
+    	     int flags, int x, 
+        	 int y, int w, int h)
+	{
+		System.out.println("observer");
+
+		if ((flags & ALLBITS) == 0)
+		{
+			System.out.println("      DONE");
+			JEmu.painting = false;
+			return true;
+		}
+		else
+		{
+			System.out.println("not yet.");
+			//repaint();
+			return false;
+		}
+	}
+
+	public void destroy()
+	{
+		System.out.println("CPU    = " + cpu.time / frames);
+		System.out.println("Video  = " + video.time / frames);
+		System.out.println("PIA    = " + devices.get(0).time / frames);
+		System.out.println("Update = " + time / frames);
 	}
 
 	//
@@ -101,32 +151,61 @@ abstract class JEmu extends JApplet implements Runnable
 		{
 			while(JEmu.running)
 			{
-				synchronized(this)
+				//synchronized(this)
 				{
 					step();
 					
 					// check if needs to update screen
 					if(video.screenDone)
 					{
+						long time_b, time_e;
+						time_b = (new Date()).getTime();
+
 						video.drawScreen();
+						getToolkit().sync();
+						
 						video.screenDone = false;
-						while(timer > (new Date()).getTime())
-							;
+						try
+						{
+							Thread.sleep(timer - (new Date()).getTime());
+						} catch(InterruptedException e) {}
+						  catch(java.lang.IllegalArgumentException ex) {}
 						timer = ((new Date()).getTime() + (1000 / video.fps));
+						time_e = (new Date()).getTime();
+						time += time_e - time_b;
+						frames += 1;
 					}
 				}
 			}
 		}
 
-		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
-		run.setMember("value", "Run");
+		try
+		{
+			JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
+			run.setMember("value", "Run");
+		}
+		catch(netscape.javascript.JSException e)
+		{
+		}
+		catch(java.lang.NullPointerException ex)
+		{
+		}
 		rebuildDebuggers();
 	}
 
 	private void threadStart()
 	{
-		JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
-		run.setMember("value", "Pause");
+		try
+		{
+			JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
+			run.setMember("value", "Pause");
+		}
+		catch(netscape.javascript.JSException e)
+		{
+		}
+		catch(java.lang.NullPointerException e)
+		{
+		}
 		/*
 		Object o[] = new Object[2];
 		o[0] = cpu.instructionPointer();
@@ -262,32 +341,42 @@ abstract class JEmu extends JApplet implements Runnable
 
 	public void rebuildDebugger(int device)
 	{
-		JSObject cpu_pos = (JSObject)JEmu.Window.eval("document.getElementById('cpu_pos');");
-		int cpu_p = 0;
+		JSObject cpu_pos = null;
 		try
 		{
-			cpu_p = Integer.parseInt(cpu_pos.getMember("value").toString(), 16);
-		}
-		catch(NumberFormatException e)
-		{
-			Object[] args = { "Invalid number." };
-			JEmu.Window.call("alert", args);
-			return;
-		}
+			cpu_pos = (JSObject)JEmu.Window.eval("document.getElementById('cpu_pos');");
+			int cpu_p = 0;
+			try
+			{
+				cpu_p = Integer.parseInt(cpu_pos.getMember("value").toString(), 16);
+			}
+			catch(NumberFormatException e)
+			{
+				Object[] args = { "Invalid number." };
+				JEmu.Window.call("alert", args);
+				return;
+			}
 
-		switch(device)
+			switch(device)
+			{
+				case -1:
+					cpu.rebuildDebugger(cpu_p);
+					break;
+				case -2:
+					video.rebuildDebugger();
+					break;
+				case -3:
+					rebuildMemoryDebugger(0);
+					break;
+				default:
+					devices.get(device).rebuildDebugger();
+			}
+		}
+		catch(netscape.javascript.JSException e)
 		{
-			case -1:
-				cpu.rebuildDebugger(cpu_p);
-				break;
-			case -2:
-				video.rebuildDebugger();
-				break;
-			case -3:
-				rebuildMemoryDebugger(0);
-				break;
-			default:
-				devices.get(device).rebuildDebugger();
+		}
+		catch(java.lang.NullPointerException ex)
+		{
 		}
 	}
 

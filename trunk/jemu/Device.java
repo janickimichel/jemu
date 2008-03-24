@@ -1,6 +1,7 @@
 abstract class Device
 {
 	protected String htmlField;
+	protected double time;
 
 	public abstract String name();
 	public abstract void reset();

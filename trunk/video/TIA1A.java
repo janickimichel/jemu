@@ -221,7 +221,7 @@ class TIA1A extends Video
 		// ball.reset();
 	}
 
-	private void setPixel(int xx, int yy, int color)
+	private final void setPixel(int xx, int yy, int color)
 	{
 		if(pixels[(yy*width + (xx * 2))] != (0xff000000 | color))
 		{
