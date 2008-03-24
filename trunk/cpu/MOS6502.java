@@ -14,7 +14,7 @@ class MOS6502 extends CPU
 	public int step()
 	{
 		int add = IP;
-		int opcode = JEmu.platform.getRAM(IP);
+		int opcode = JEmu.ram[IP];
 		int src, address, cycles = 0;
 		
 		switch(opcode)
@@ -302,65 +302,65 @@ class MOS6502 extends CPU
 
 	private int zpa(int pos)
 	{
-		return JEmu.platform.getRAM(pos + 1);
+		return JEmu.ram[pos + 1];
 	}
 
 	private int zpx(int pos)
 	{
-		return JEmu.platform.getRAM(pos + 1) + X;
+		return JEmu.ram[pos + 1] + X;
 	}
 
 	private int zpy(int pos)
 	{
-		return JEmu.platform.getRAM(pos + 1) + Y;
+		return JEmu.ram[pos + 1] + Y;
 	}
 
 	private int abs(int pos)
 	{
-		return ((JEmu.platform.getRAM(pos+1))|((JEmu.platform.getRAM(pos+2))<<8));
+		return (JEmu.ram[pos+1]|(JEmu.ram[pos+2])<<8);
 	}
 
 	private int abx(int pos)
 	{
-		return ((JEmu.platform.getRAM(pos+1))|((JEmu.platform.getRAM(pos+2))<<8)) + X;
+		return (JEmu.ram[pos+1]|(JEmu.ram[pos+2]<<8)) + X;
 	}
 
 	private int aby(int pos)
 	{
-		return ((JEmu.platform.getRAM(pos+1))|((JEmu.platform.getRAM(pos+2))<<8)) + Y;
+		return (JEmu.ram[pos+1]|(JEmu.ram[pos+2]<<8)) + Y;
 	}
 
 	private int inx(int pos)
 	{
-		int lsrc = JEmu.platform.getRAM(pos + 1);
-		return ((lsrc+X)|((JEmu.platform.getRAM(lsrc+X+1))<<8));
+		int lsrc = JEmu.ram[pos + 1];
+		return ((lsrc+X)|(JEmu.ram[lsrc+X+1]<<8));
 	}
 
 	private int iny(int pos)
 	{
-		int lsrc = JEmu.platform.getRAM(pos + 1);
+		int lsrc = JEmu.ram[pos + 1];
 		return ((lsrc)|((lsrc+1)<<8)) + Y;
 	}
 
 	private int rel(int pos) // WARNING: returns src, not address
 	{
-		if(JEmu.platform.getRAM(pos + 1) > 127)
-			return (pos + instructionSize(pos) - (0x100 - JEmu.platform.getRAM(pos + 1)));
+		if(JEmu.ram[pos + 1] > 127)
+			return (pos + instructionSize(pos) - (0x100 - JEmu.ram[pos + 1]));
 		else
-			return (pos + instructionSize(pos) + JEmu.platform.getRAM(pos + 1));
+			return (pos + instructionSize(pos) + JEmu.ram[pos + 1]);
 	}
 
 	private int ind(int pos)
 	{
-		int lsrc = JEmu.platform.getRAM(pos + 1);
-		int hsrc = JEmu.platform.getRAM(pos + 2);
+		int lsrc = JEmu.ram[pos + 1];
+		int hsrc = JEmu.ram[pos + 2];
 		int src = ((lsrc)|((hsrc)<<8));
-		return (JEmu.platform.getRAM(src) | JEmu.platform.getRAM(src+1) << 8);
+		return (JEmu.ram[src] | JEmu.ram[src+1] << 8);
 	}
 
 	private int getSrc(int address)
 	{
-		return JEmu.platform.getRAM(address);
+		return JEmu.ram[address];
 	}
 
 
@@ -488,7 +488,7 @@ class MOS6502 extends CPU
 		B = true;
 		PUSH(SP, cycles);
 		I = true;
-		IP = (JEmu.platform.getRAM(0xFFFE)|(JEmu.platform.getRAM(0xFFFF)<<8));
+		IP = (JEmu.ram[0xFFFE]|(JEmu.ram[0xFFFF]<<8));
 	}
 
 	private int BVC(int src)
@@ -839,7 +839,7 @@ class MOS6502 extends CPU
 	}
 	private int PULL()
 	{
-		return JEmu.platform.getRAM((++SP)+0x100);
+		return JEmu.ram[(++SP)+0x100];
 	}
 
 
@@ -851,7 +851,7 @@ class MOS6502 extends CPU
 	 */
 	protected int instructionSize(int pos)
 	{
-			short opcode = JEmu.platform.getRAM(pos);
+			short opcode = JEmu.ram[pos];
 
 			/* find out how many bytes this opcode uses */
 			switch(opcode)
@@ -1025,13 +1025,13 @@ class MOS6502 extends CPU
 	{
 		int instSize = instructionSize(pos);
 		short lsrc = 0, hsrc = 0;
-		short opcode = JEmu.platform.getRAM(pos);
+		short opcode = JEmu.ram[pos];
 		int src = 0;
 
 		if(instSize > 1)
-				lsrc = JEmu.platform.getRAM(pos + 1);
+				lsrc = JEmu.ram[pos + 1];
 		if(instSize > 2)
-				hsrc = JEmu.platform.getRAM(pos + 2);
+				hsrc = JEmu.ram[pos + 2];
 
 		String debug_par = "", debug_opcode = "";
 
@@ -1532,7 +1532,7 @@ class MOS6502 extends CPU
 
 	protected String debugNumCycles(int pos)
 	{
-		int opcode = JEmu.platform.getRAM(pos);
+		int opcode = JEmu.ram[pos];
 
 		switch(opcode)
 		{
@@ -1860,13 +1860,13 @@ class MOS6502 extends CPU
 	private int addressing(int pos, int instSize)
 	{
 		short lsrc = 0, hsrc = 0;
-		short opcode = JEmu.platform.getRAM(pos);
+		short opcode = JEmu.ram[pos];
 		int src = 0, address;
 
 		if(instSize > 1)
-				lsrc = JEmu.platform.getRAM(pos + 1);
+				lsrc = JEmu.ram[pos + 1];
 		if(instSize > 2)
-				hsrc = JEmu.platform.getRAM(pos + 2);
+				hsrc = JEmu.ram[pos + 2];
 
 		switch (opcode)
 		{
@@ -1948,7 +1948,7 @@ class MOS6502 extends CPU
 			case 0x86: /* STX */
 			case 0x84: /* STY */
 				address = lsrc;
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 
 			/* Zero page, X: loads from the (zero page + X) */
@@ -1970,13 +1970,13 @@ class MOS6502 extends CPU
 			case 0x96: /* STX */
 			case 0x94: /* STY */
 				address = lsrc + X;
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 
 			/* Zero page, Y: loads from the (zero page + Y) */
 			case 0xB6: /* LDX */
 				address = lsrc + Y;
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 
 			/* Absolute: it'll pass an absolute 16-bit memory
@@ -2005,7 +2005,7 @@ class MOS6502 extends CPU
 			case 0x8C: /* STY */
 			case 0x4C: /* JMP */
 				address = ((lsrc)|((hsrc)<<8));
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 
 			/* Absoulte, X: get the byte in the (absolute + X)
@@ -2026,7 +2026,7 @@ class MOS6502 extends CPU
 			case 0x1D: /* ORA */
 			case 0xFD: /* SBC */
 				address = ((lsrc)|((hsrc)<<8)) + X;
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 				
 			/* Absolute, Y: get the byte in the (absolute + Y)
@@ -2041,7 +2041,7 @@ class MOS6502 extends CPU
 			case 0x19: /* ORA */
 			case 0xF9: /* SBC */
 				address = ((lsrc)|((hsrc)<<8)) + Y;
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 
 			/* (Indirect, X): get the byte into the (zero page + X)
@@ -2055,8 +2055,8 @@ class MOS6502 extends CPU
 			case 0x01: /* ORA */
 			case 0xE1: /* SBC */
 			case 0x81: /* STA */
-				address = ((lsrc+X)|((JEmu.platform.getRAM(lsrc+X+1))<<8));
-				src = JEmu.platform.getRAM(address);
+				address = ((lsrc+X)|((JEmu.ram[lsrc+X+1])<<8));
+				src = JEmu.ram[address];
 				break;
 
 			/* (Indirect), Y: get the byte into the zero page and
@@ -2071,7 +2071,7 @@ class MOS6502 extends CPU
 			case 0x11: /* ORA */
 			case 0xF1: /* SBC */
 				address = ((lsrc)|((lsrc+1)<<8)) + Y;
-				src = JEmu.platform.getRAM(address);
+				src = JEmu.ram[address];
 				break;
 
 			/* Relative: used in branches. Adds to IP if the
@@ -2095,7 +2095,7 @@ class MOS6502 extends CPU
 			 * position of the memory and the next byte. */
 			case 0x6C: /* JMP */
 				address = ((lsrc)|((hsrc)<<8));
-				src = (JEmu.platform.getRAM(address) | JEmu.platform.getRAM(address+1) << 8);
+				src = (JEmu.ram[address] | JEmu.ram[address+1] << 8);
 				break;
 		}
 
