@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Date;
 
 public class Atari2600 extends JEmu
 {
@@ -19,11 +20,22 @@ public class Atari2600 extends JEmu
 
 	public void step()
 	{
+		long time_b, time_e;
+
+		time_b = (new Date()).getTime();
 		int cycles = cpu.step();
+		time_e = (new Date()).getTime();
+		cpu.time += time_e - time_b;
+
+		time_b = (new Date()).getTime();
 		video.step(cycles);
-		// video.step(cycles);
-		// video.step(cycles);
+		time_e = (new Date()).getTime();
+		video.time += time_e - time_b;
+
+		time_b = (new Date()).getTime();
 		pia6532.step(cycles);
+		time_e = (new Date()).getTime();
+		pia6532.time += time_e - time_b;
 	}
 
 	void loadROM(List<Short> d)

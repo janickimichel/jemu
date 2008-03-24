@@ -11,6 +11,7 @@ abstract class Video extends Device
 	public int fps;
 
 	public BufferedImage image;
+	public BufferedImage backImage;
 
 	protected int[] pixels;
 
@@ -19,13 +20,17 @@ abstract class Video extends Device
 		this.fps = fps;
 
 		image = new BufferedImage(width(), height(), BufferedImage.TYPE_INT_ARGB);
+		backImage = new BufferedImage(width(), height(), BufferedImage.TYPE_INT_ARGB);
 
 		WritableRaster wr = image.getRaster();
 		DataBuffer db = (DataBuffer)wr.getDataBuffer();
 		DataBufferInt dbi = (DataBufferInt)db;
 		pixels = dbi.getData();
 
-		for(int i=0; i<(width()*height()); i++)
+		int w = width();
+		int h = height();
+
+		for(int i=0; i<(w*h); i++)
 			pixels[i] = 0xff000000;
 
 		drawScreen();
@@ -40,7 +45,10 @@ abstract class Video extends Device
 
 	public void drawScreen()
 	{
+//		JEmu.painting = true;
 		JEmu.platform.repaint();
+//		while(JEmu.painting)
+//			;
 	}
 
 	public abstract int height();

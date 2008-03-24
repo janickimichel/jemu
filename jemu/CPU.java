@@ -8,6 +8,7 @@ abstract class CPU
 	protected int reg[];
 	protected String flagName[];
 	protected byte flag[];
+	protected double time;
 	private int memPos[] = new int[16];
 
 	public void rebuildDebugger(int pos)

@@ -1,4 +1,4 @@
-JAVAC = javac -d classes/ -cp classes -cp $(CLASSPATH) -g
+JAVAC = javac -O -d classes/ -cp classes -g #-cp $(CLASSPATH)
 
 #
 # General
