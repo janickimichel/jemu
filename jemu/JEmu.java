@@ -18,15 +18,17 @@ abstract class JEmu extends JApplet implements Runnable
 	public static JSObject Window = null;
 	public static JEmu platform;
 	public static boolean running = false;
+	public int frameskip = 1;
 	private double time;
 	private long frames;
 
 	protected MemoryMaps memoryMaps = new MemoryMaps();
 
-	private short data[];
+	public static short ram[];
 	private Thread thread = null;
 
 	public static boolean painting = false;
+	public static int currentFrame = 0;
 
 	/*
 	 * Applet methods
@@ -70,19 +72,12 @@ abstract class JEmu extends JApplet implements Runnable
 
 	public void update(Graphics g)
 	{
-		// g.drawImage(video.image, 0, 0, this);
-		// g.drawImage(video.image, 0, 0, this);
 		paint(g);
 	}
 
 	public void paint(Graphics g) 
 	{
-		// update(g);
-		Graphics bufG = video.backImage.getGraphics();
-		bufG.drawImage(video.image, 0, 0, null);
-		bufG.dispose();
-		
-		g.drawImage(video.backImage, 0, 0, this);
+		g.drawImage(video.image, 0, 0, this);
 	}
 
 	public boolean imageUpdate(Image im, 
@@ -151,7 +146,7 @@ abstract class JEmu extends JApplet implements Runnable
 		{
 			while(JEmu.running)
 			{
-				//synchronized(this)
+				synchronized(this)
 				{
 					step();
 					
@@ -161,19 +156,27 @@ abstract class JEmu extends JApplet implements Runnable
 						long time_b, time_e;
 						time_b = (new Date()).getTime();
 
-						video.drawScreen();
-						getToolkit().sync();
-						
-						video.screenDone = false;
+						if(JEmu.currentFrame == 0)
+						{
+							video.drawScreen();
+							getToolkit().sync();
+						}
+
 						try
 						{
 							Thread.sleep(timer - (new Date()).getTime());
 						} catch(InterruptedException e) {}
 						  catch(java.lang.IllegalArgumentException ex) {}
 						timer = ((new Date()).getTime() + (1000 / video.fps));
+
+						video.screenDone = false;
 						time_e = (new Date()).getTime();
 						time += time_e - time_b;
 						frames += 1;
+
+						JEmu.currentFrame--;
+						if(JEmu.currentFrame < 0)
+							JEmu.currentFrame = frameskip;
 					}
 				}
 			}
@@ -267,8 +270,8 @@ abstract class JEmu extends JApplet implements Runnable
 	void initRAM(int size)
 	{
 		System.out.print("Initializing memory... ");
-		data = new short[size];
-		for(short b: data)
+		ram = new short[size];
+		for(short b: ram)
 			b = 0;
 		System.out.println("ok!");
 	}
@@ -278,25 +281,15 @@ abstract class JEmu extends JApplet implements Runnable
 		Device dev = memoryMaps.device(pos);
 		d = (short)(d & 0xff);
 		if(dev == null)
-			setRAMDirect(pos, d);
+			JEmu.ram[pos] = d;
 		else
 			if(dev.memorySet(pos, d, cycles))
-				setRAMDirect(pos, d);
-	}
-
-	void setRAMDirect(int pos, short d)
-	{
-		data[pos] = d;
+				JEmu.ram[pos] = d;
 	}
 
 	void setRAM(int pos, int d, int cycles)
 	{
 		setRAM(pos, (short)d, cycles);
-	}
-
-	short getRAM(int pos)
-	{
-		return data[pos];
 	}
 
 	private void rebuildMemoryDebugger(int pos)

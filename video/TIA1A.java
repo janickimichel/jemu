@@ -253,9 +253,12 @@ class TIA1A extends Video
 		}
 
 		// draw
-		int x1 = x < 0 ? 0 : x;
-		int x2 = x + (cycles * 3) > 160 ? 160 : x + (cycles * 3);
-		draw(x1, x2);
+		if(JEmu.currentFrame == 0)
+		{
+			int x1 = x < 0 ? 0 : x;
+			int x2 = x + (cycles * 3) > 160 ? 160 : x + (cycles * 3);
+			draw(x1, x2);
+		}
 
 		x += (cycles * 3);
 

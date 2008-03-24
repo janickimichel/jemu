@@ -52,7 +52,7 @@ abstract class CPU
 			s += "<td " + color + "><b>" + debugInstruction(bt) + "</b></td>";
 			s += "<td " + color + ">";
 			for(int j=0; j<instSize; j++)
-				s += Integer.toHexString(JEmu.platform.getRAM(bt+j)).toUpperCase() + " ";
+				s += Integer.toHexString(JEmu.ram[bt+j]).toUpperCase() + " ";
 			s += "</td>";
 			s += "<td " + color + ">" + debugNumCycles(bt) + "</td>";
 			s += "</tr>";
