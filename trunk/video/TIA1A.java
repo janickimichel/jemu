@@ -176,6 +176,7 @@ class TIA1A extends Video
 	// Electron
 	//
 	private int x, y;
+	private int width;
 	private boolean lastWasSync = false;
 
 	//
@@ -199,6 +200,7 @@ class TIA1A extends Video
 	public TIA1A()
 	{
 		super(60);
+		width = width();
 		m[0] = new Missile(0);
 		m[1] = new Missile(1);
 		p[0] = new Player();
@@ -221,8 +223,11 @@ class TIA1A extends Video
 
 	private void setPixel(int xx, int yy, int color)
 	{
-		pixels[(yy*width() + (xx * 2))] = 0xff000000 | color;
-		pixels[(yy*width() + (xx * 2 + 1))] = 0xff000000 | color;
+		if(pixels[(yy*width + (xx * 2))] != (0xff000000 | color))
+		{
+			pixels[(yy*width + (xx * 2))] = 0xff000000 | color;
+			pixels[(yy*width + (xx * 2 + 1))] = 0xff000000 | color;
+		}
 	}
 
 	private void draw(int x1, int x2)
