@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.awt.image.*;
+import java.util.Stack;
 
 abstract class Video extends Device
 {
@@ -9,6 +10,9 @@ abstract class Video extends Device
 	public boolean screenDone = false;
 	public boolean screenBegin = false;
 	public int fps;
+
+	public Stack<Rect> updates = new Stack<Rect>();
+	public Stack<Rect> lastUpdates = new Stack<Rect>();
 
 	public BufferedImage image;
 
@@ -31,22 +35,44 @@ abstract class Video extends Device
 		for(int i=0; i<(w*h); i++)
 			pixels[i] = 0xff000000;
 
-		drawScreen();
+		JEmu.platform.repaint();
 	}
 
 	public void clearScreen()
 	{
 		for(int i=0; i<(width()*height()); i++)
 			pixels[i] = 0xff000000;
-		drawScreen();
+		JEmu.platform.repaint();
 	}
 
 	public void drawScreen()
 	{
-//		JEmu.painting = true;
+		/*
+		try
+		{
+			while(true)
+			{
+				Rect r = lastUpdates.pop();
+				JEmu.platform.repaint(r.x, r.y, r.w, r.h);
+				// System.out.println("last: " + r);
+			}
+		}
+		catch(java.util.EmptyStackException e) {}
+
+		try
+		{
+			while(true)
+			{
+				Rect r = updates.pop();
+				lastUpdates.push(r);
+				JEmu.platform.repaint(r.x, r.y, r.w, r.h);
+				// System.out.println("updates: " + r);
+			}
+		}
+		catch(java.util.EmptyStackException e) {}
+		*/
+
 		JEmu.platform.repaint();
-//		while(JEmu.painting)
-//			;
 	}
 
 	public abstract int height();

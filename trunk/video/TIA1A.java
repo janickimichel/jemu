@@ -1,4 +1,5 @@
 import netscape.javascript.JSObject;
+import java.util.Stack;
 
 class TIA1A extends Video
 {
@@ -25,6 +26,7 @@ class TIA1A extends Video
 
 		abstract void reset();
 		abstract void draw(int x1, int x2);
+		abstract void updateStack();
 	};
 
 	//
@@ -41,6 +43,11 @@ class TIA1A extends Video
 		{
 			for(int i = x1; i < x2; i++)
 				setPixel(i, y, color);
+		}
+
+		void updateStack()
+		{
+			// updates.push(new Rect(0, 0, 1, 1));
 		}
 	};
 
@@ -110,6 +117,8 @@ class TIA1A extends Video
 				}
 			}
 		}
+
+		void updateStack() {}
 	}
 
 	//
@@ -126,6 +135,10 @@ class TIA1A extends Video
 		private boolean[] pixel = new boolean[160];
 		int speed;
 
+		// optimization
+		int op_x, op_y, op_x2, op_y2;
+		boolean op_had;
+
 		void reset()
 		{
 			size = 1;
@@ -133,6 +146,7 @@ class TIA1A extends Video
 			speed = 0;
 			for(int i=0; i<160; i++)
 				pixel[i] = false;
+			op_x = op_y = op_x2 = op_y2 = -1;
 		}
 
 		void setSize(int i)
@@ -150,15 +164,44 @@ class TIA1A extends Video
 
 		void redraw()
 		{
+			boolean any = false;
+
 			for(int i = 0; i < 160; i++)
-				pixel[i] = (i == pos);
+				if(i == pos)
+				{
+					pixel[i] = true;
+					if(i < op_x || op_x == -1)
+						op_x = x;
+					if(i > op_x2 || op_x2 == -1)
+						op_x2 = x;
+				}
+				else
+					pixel[i] = false;
+
 		}
 
 		void draw(int x1, int x2)
 		{
 			for(int i = x1; i < x2; i++)
 				if(pixel[i])
+				{
 					setPixel(i, y, p[n].color);
+					op_had = true;
+				}
+
+			if(y < op_y || op_y == -1)
+				op_y = y;
+			if(y > op_y2 || op_y2 == -1)
+				op_y2 = y;
+		}
+
+		void updateStack()
+		{
+			if(op_had)
+			{
+				updates.push(new Rect(op_x*2, op_y, (op_x2+1)*2, op_y2+1));
+				op_x = op_y = op_x = op_y2 = -1;
+			}
 		}
 	}
 
@@ -243,6 +286,14 @@ class TIA1A extends Video
 				m[0].draw(x1, x2);
 		}
 	}
+
+	private void updateStack()
+	{
+		background.updateStack();
+		playfield.updateStack();
+		m[1].updateStack();
+		m[0].updateStack();
+	}
 	
 	public void step(int cycles)
 	{
@@ -253,13 +304,11 @@ class TIA1A extends Video
 		}
 
 		// draw
-		if(JEmu.currentFrame == 0)
-		{
-			int x1 = x < 0 ? 0 : x;
-			int x2 = x + (cycles * 3) > 160 ? 160 : x + (cycles * 3);
+		int x1 = x < 0 ? 0 : x;
+		int x2 = x + (cycles * 3) > 160 ? 160 : x + (cycles * 3);
+		if(x2 >= 0)
 			draw(x1, x2);
-		}
-
+		
 		x += (cycles * 3);
 
 		if(x > 159)
@@ -268,13 +317,16 @@ class TIA1A extends Video
 			y++;
 
 			if(y == 192)
+			{
+				updateStack();
 				screenDone = true;
+			}
 			else if(y == 40)
 				screenBegin = true;
 			else if(y == 260)
 				y = 0;
 		}
-	
+
 		if(posAfter != -1)
 			memorySetAfter(posAfter, dataAfter, 0);
 	}
@@ -291,20 +343,24 @@ class TIA1A extends Video
 			case VSYNC:
 				if((data & 0x2) > 0)
 				{
+					//updateStack();
 					x = -68;
 					y = -40;
-					screenDone = true;
+					//screenDone = true;
 					lastWasSync = true;
 				}
 				break;
 
 			case WSYNC:
-				draw(x<0 ? 0 : x, 160);
+				draw((x < 0) ? 0 : x, 160);
 				x = -68;
 				y++;
 
 				if(y == 192)
+				{
+					updateStack();
 					screenDone = true;
+				}
 				else if(y == 40)
 					screenBegin = true;
 				else if(y == 260)

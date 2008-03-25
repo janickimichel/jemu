@@ -18,9 +18,9 @@ abstract class JEmu extends JApplet implements Runnable
 	public static JSObject Window = null;
 	public static JEmu platform;
 	public static boolean running = false;
-	public int frameskip = 1;
+	public int frameskip = 0;
 	private double time;
-	private long frames;
+	public long frames;
 
 	protected MemoryMaps memoryMaps = new MemoryMaps();
 
