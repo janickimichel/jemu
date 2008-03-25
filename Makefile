@@ -1,4 +1,4 @@
-JAVAC = javac -O -d classes/ -cp classes -g -cp $(CLASSPATH)
+JAVAC = javac -d classes/ -cp classes -g -cp $(CLASSPATH)
 
 #
 # General
@@ -10,6 +10,7 @@ all: \
 	jemu/Video.java \
 	jemu/BreakPoints.java \
 	jemu/MemoryMaps.java \
+	jemu/Rect.java \
 	\
 	platform/Atari2600.java \
 	\
