@@ -1,7 +1,8 @@
 abstract class Device
 {
 	protected String htmlField;
-	protected double time;
+
+	public Timer timer = new Timer();
 
 	public abstract String name();
 	public abstract void reset();

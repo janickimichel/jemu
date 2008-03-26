@@ -4,11 +4,13 @@ abstract class CPU
 {
 	public int IP;
 	public BreakPoints breakPoints = new BreakPoints();
+	public Timer timer = new Timer();
+
 	protected String registerName[];
 	protected int reg[];
 	protected String flagName[];
 	protected byte flag[];
-	protected double time;
+
 	private int memPos[] = new int[16];
 
 	public void rebuildDebugger(int pos)

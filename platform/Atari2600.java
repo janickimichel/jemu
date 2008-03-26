@@ -20,22 +20,17 @@ public class Atari2600 extends JEmu
 
 	public void step()
 	{
-		long time_b, time_e;
-
-		time_b = (new Date()).getTime();
+		cpu.timer.start();
 		int cycles = cpu.step();
-		time_e = (new Date()).getTime();
-		cpu.time += time_e - time_b;
+		cpu.timer.stop();
 
-		time_b = (new Date()).getTime();
+		video.timer.start();
 		video.step(cycles);
-		time_e = (new Date()).getTime();
-		video.time += time_e - time_b;
+		video.timer.stop();
 
-		time_b = (new Date()).getTime();
+		pia6532.timer.start();
 		pia6532.step(cycles);
-		time_e = (new Date()).getTime();
-		pia6532.time += time_e - time_b;
+		pia6532.timer.stop();
 	}
 
 	void loadROM(List<Short> d)
