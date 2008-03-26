@@ -11,6 +11,7 @@ all: \
 	jemu/BreakPoints.java \
 	jemu/MemoryMaps.java \
 	jemu/Rect.java \
+	jemu/Timer.java \
 	\
 	platform/Atari2600.java \
 	\

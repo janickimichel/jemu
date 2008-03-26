@@ -20,7 +20,6 @@ abstract class JEmu extends JApplet implements Runnable
 	public static boolean running = false;
 	public int frameskip = 1;
 	private double time;
-	public long frames;
 
 	protected MemoryMaps memoryMaps = new MemoryMaps();
 
@@ -36,7 +35,6 @@ abstract class JEmu extends JApplet implements Runnable
 	public JEmu()
 	{
 		JEmu.platform = this;
-		frames = 0;
 	}
 
 	public void start()
@@ -102,10 +100,10 @@ abstract class JEmu extends JApplet implements Runnable
 
 	public void destroy()
 	{
-		System.out.println("CPU    = " + cpu.time / frames);
-		System.out.println("Video  = " + video.time / frames);
-		System.out.println("PIA    = " + devices.get(0).time / frames);
-		System.out.println("Update = " + time / frames);
+		System.out.println("CPU    = " + cpu.timer.timeByFrame());
+		System.out.println("Video  = " + video.timer.timeByFrame());
+		System.out.println("PIA    = " + devices.get(0).timer.timeByFrame());
+		// System.out.println("Update = " + time / frames);
 	}
 
 	//
@@ -167,7 +165,7 @@ abstract class JEmu extends JApplet implements Runnable
 					video.screenDone = false;
 					time_e = (new Date()).getTime();
 					time += time_e - time_b;
-					frames += 1;
+					Timer.frames++;
 
 					JEmu.currentFrame--;
 					if(JEmu.currentFrame < 0)
