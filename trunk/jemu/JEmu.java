@@ -18,7 +18,7 @@ abstract class JEmu extends JApplet implements Runnable
 	public static JSObject Window = null;
 	public static JEmu platform;
 	public static boolean running = false;
-	public int frameskip = 0;
+	public int frameskip = 1;
 	private double time;
 	public long frames;
 
@@ -119,26 +119,23 @@ abstract class JEmu extends JApplet implements Runnable
 		{
 			while(JEmu.running)
 			{
-				synchronized(this)
-				{
-					step();
+				step();
 					
-					// check for breakpoints
-					if(cpu.breakPoints.contains(cpu.IP))
-					{
-						running = false;
-						video.drawScreen();
-					}
+				// check for breakpoints
+				if(cpu.breakPoints.contains(cpu.IP))
+				{
+					running = false;
+					video.drawScreen();
+				}
 				
-					// check if needs to update screen
-					if(video.screenDone)
-					{
-						video.drawScreen();
-						video.screenDone = false;
-						while(timer > (new Date()).getTime())
-							;
-						timer = ((new Date()).getTime() + (1000 / video.fps));
-					}
+				// check if needs to update screen
+				if(video.screenDone)
+				{
+					video.drawScreen();
+					video.screenDone = false;
+					while(timer > (new Date()).getTime())
+						;
+					timer = ((new Date()).getTime() + (1000 / video.fps));
 				}
 			}
 		}
@@ -146,38 +143,35 @@ abstract class JEmu extends JApplet implements Runnable
 		{
 			while(JEmu.running)
 			{
-				synchronized(this)
-				{
-					step();
+				step();
 					
-					// check if needs to update screen
-					if(video.screenDone)
+				// check if needs to update screen
+				if(video.screenDone)
+				{
+					long time_b, time_e;
+					time_b = (new Date()).getTime();
+
+					if(JEmu.currentFrame == 0)
 					{
-						long time_b, time_e;
-						time_b = (new Date()).getTime();
-
-						if(JEmu.currentFrame == 0)
-						{
-							video.drawScreen();
-							getToolkit().sync();
-						}
-
-						try
-						{
-							Thread.sleep(timer - (new Date()).getTime());
-						} catch(InterruptedException e) {}
-						  catch(java.lang.IllegalArgumentException ex) {}
-						timer = ((new Date()).getTime() + (1000 / video.fps));
-
-						video.screenDone = false;
-						time_e = (new Date()).getTime();
-						time += time_e - time_b;
-						frames += 1;
-
-						JEmu.currentFrame--;
-						if(JEmu.currentFrame < 0)
-							JEmu.currentFrame = frameskip;
+						video.drawScreen();
+						getToolkit().sync();
 					}
+
+					try
+					{
+						Thread.sleep(timer - (new Date()).getTime());
+					} catch(InterruptedException e) {}
+					  catch(java.lang.IllegalArgumentException ex) {}
+					timer = ((new Date()).getTime() + (1000 / video.fps));
+
+					video.screenDone = false;
+					time_e = (new Date()).getTime();
+					time += time_e - time_b;
+					frames += 1;
+
+					JEmu.currentFrame--;
+					if(JEmu.currentFrame < 0)
+						JEmu.currentFrame = frameskip;
 				}
 			}
 		}

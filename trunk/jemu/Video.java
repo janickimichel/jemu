@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.MemoryImageSource;
 import java.awt.image.*;
 import java.util.Stack;
 
