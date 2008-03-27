@@ -12,26 +12,26 @@ abstract class JEmu extends JApplet implements Runnable
 	/*
 	 * Fields
 	 */
-	public CPU cpu;
-	public Video video;
-	public List<Device> devices = new ArrayList<Device>();
-	public static JSObject Window = null;
-	public static JEmu platform;
-	public static boolean running = false;
-	public int frameskip = 1;
-	private double time;
+	public CPU cpu; // emulador CPU
+	public Video video; // emulator Video card
+	public List<Device> devices = new ArrayList<Device>(); // emulator other devices
 
 	protected MemoryMaps memoryMaps = new MemoryMaps();
+	public static short ram[]; // RAM memory
 
-	public static short ram[];
-	private Thread thread = null;
+	public static JSObject Window = null; // HTML window (javascript object)
+	public static JEmu platform; // myself
 
-	public static boolean painting = false;
-	public static int currentFrame = 0;
+	public static boolean running = false; // is the emulator running?
+	private Thread thread = null; // thread that runs the emulator
+	public int frameskip = 1; // video frameskip (TODO - move to video?)
+	public static int currentFrame = 0; // used to control frameskip
 
-	/*
-	 * Applet methods
-	 */
+	private Timer updatingTimer = new Timer();
+
+	//
+	// Applet methods
+	//
 	public JEmu()
 	{
 		JEmu.platform = this;
@@ -62,11 +62,11 @@ abstract class JEmu extends JApplet implements Runnable
 		}
 		catch(netscape.javascript.JSException e)
 		{
+			// using appletviewer
+			loadROM("rom/atari2600/dot.bin");
+			reset();
+			runButton();
 		}
-
-		loadROM("rom/atari2600/dot.bin");
-		reset();
-		runButton();
 	}
 
 	public void update(Graphics g)
@@ -79,32 +79,12 @@ abstract class JEmu extends JApplet implements Runnable
 		g.drawImage(video.image, 0, 0, this);
 	}
 
-	public boolean imageUpdate(Image im, 
-    	     int flags, int x, 
-        	 int y, int w, int h)
-	{
-		System.out.println("observer");
-
-		if ((flags & ALLBITS) == 0)
-		{
-			System.out.println("      DONE");
-			JEmu.painting = false;
-			return true;
-		}
-		else
-		{
-			System.out.println("not yet.");
-			//repaint();
-			return false;
-		}
-	}
-
 	public void destroy()
 	{
 		System.out.println("CPU    = " + cpu.timer.timeByFrame());
 		System.out.println("Video  = " + video.timer.timeByFrame());
 		System.out.println("PIA    = " + devices.get(0).timer.timeByFrame());
-		// System.out.println("Update = " + time / frames);
+		System.out.println("Update = " + updatingTimer.timeByFrame());
 	}
 
 	//
@@ -138,7 +118,7 @@ abstract class JEmu extends JApplet implements Runnable
 				}
 			}
 		}
-		else /* no breakpoints */
+		else // no breakpoints 
 		{
 			while(JEmu.running)
 			{
@@ -147,8 +127,7 @@ abstract class JEmu extends JApplet implements Runnable
 				// check if needs to update screen
 				if(video.screenDone)
 				{
-					long time_b, time_e;
-					time_b = (new Date()).getTime();
+					updatingTimer.start();
 
 					if(JEmu.currentFrame == 0)
 					{
@@ -164,8 +143,7 @@ abstract class JEmu extends JApplet implements Runnable
 					timer = ((new Date()).getTime() + (1000 / video.fps));
 
 					video.screenDone = false;
-					time_e = (new Date()).getTime();
-					time += time_e - time_b;
+					updatingTimer.stop();
 					Timer.frames++;
 
 					JEmu.currentFrame--;
@@ -189,6 +167,7 @@ abstract class JEmu extends JApplet implements Runnable
 		rebuildDebuggers();
 	}
 
+	// start execution thread
 	private void threadStart()
 	{
 		try
@@ -202,37 +181,22 @@ abstract class JEmu extends JApplet implements Runnable
 		catch(java.lang.NullPointerException e)
 		{
 		}
-		/*
-		Object o[] = new Object[2];
-		o[0] = cpu.instructionPointer();
-		o[1] = -1;
-		JEmu.Window.call("debug_line", o);
-		*/
 
 		JEmu.running = true;
 		thread = new Thread(this);
 		thread.start();
 	}
 
+	// suspend execution thread
 	private void threadSuspend()
 	{
 		JEmu.running = false;
-		/*
-		try
-		{
-			thread.join();
-			///*
-			JSObject run = (JSObject)JEmu.Window.eval("document.getElementById('run');");
-			run.setMember("value", "Run");
-			rebuildDebuggers();
-			//
-		} catch(InterruptedException e) { } */
 	}
 
 
-	/*
-	 * Memory
-	 */
+	//
+	// Memory
+	//
 	public void loadROM(String file)
 	{
 		URL url = null;
@@ -280,6 +244,7 @@ abstract class JEmu extends JApplet implements Runnable
 				JEmu.ram[pos] = d;
 	}
 
+	// TODO - do something about this waste of precious time
 	void setRAM(int pos, int d, int cycles)
 	{
 		setRAM(pos, (short)d, cycles);
@@ -287,6 +252,7 @@ abstract class JEmu extends JApplet implements Runnable
 
 	private void rebuildMemoryDebugger(int pos)
 	{
+		// TODO
 	}
 
 	/*

@@ -16,275 +16,276 @@ class MOS6502 extends CPU
 		int add = IP;
 		int opcode = JEmu.ram[IP];
 		int src, address, cycles = 0;
+		int is = 1; // instruction size
 		
 		switch(opcode)
 		{
 			// ADC (add with carry)
-			case 0x69: cycles = 2; ADC(getSrc(imm(IP))); break;
-			case 0x65: cycles = 3; ADC(getSrc(zpa(IP))); break;
-			case 0x75: cycles = 4; ADC(getSrc(zpx(IP))); break;
-			case 0x6D: cycles = 4; ADC(getSrc(abs(IP))); break;
-			case 0x7D: cycles = 4; ADC(getSrc(abx(IP))); break;
-			case 0x79: cycles = 4; ADC(getSrc(aby(IP))); break;
-			case 0x61: cycles = 6; ADC(getSrc(inx(IP))); break;
-			case 0x71: cycles = 5; ADC(getSrc(iny(IP))); break;
+			case 0x69: cycles = 2; ADC(getSrc(imm(IP))); is = 2; break;
+			case 0x65: cycles = 3; ADC(getSrc(zpa(IP))); is = 2; break;
+			case 0x75: cycles = 4; ADC(getSrc(zpx(IP))); is = 2; break;
+			case 0x6D: cycles = 4; ADC(getSrc(abs(IP))); is = 3; break;
+			case 0x7D: cycles = 4; ADC(getSrc(abx(IP))); is = 3; break;
+			case 0x79: cycles = 4; ADC(getSrc(aby(IP))); is = 3; break;
+			case 0x61: cycles = 6; ADC(getSrc(inx(IP))); is = 2; break;
+			case 0x71: cycles = 5; ADC(getSrc(iny(IP))); is = 2; break;
 
 			// AND (and with memory and A)
-			case 0x29: cycles = 2; AND(getSrc(imm(IP))); break;
-			case 0x25: cycles = 3; AND(getSrc(zpa(IP))); break;
-			case 0x35: cycles = 4; AND(getSrc(zpx(IP))); break;
-			case 0x2D: cycles = 4; AND(getSrc(abs(IP))); break;
-			case 0x3D: cycles = 4; AND(getSrc(abx(IP))); break;
-			case 0x39: cycles = 4; AND(getSrc(aby(IP))); break;
-			case 0x21: cycles = 6; AND(getSrc(inx(IP))); break;
-			case 0x31: cycles = 5; AND(getSrc(iny(IP))); break;
+			case 0x29: cycles = 2; AND(getSrc(imm(IP))); is = 2; break;
+			case 0x25: cycles = 3; AND(getSrc(zpa(IP))); is = 2; break;
+			case 0x35: cycles = 4; AND(getSrc(zpx(IP))); is = 2; break;
+			case 0x2D: cycles = 4; AND(getSrc(abs(IP))); is = 3; break;
+			case 0x3D: cycles = 4; AND(getSrc(abx(IP))); is = 3; break;
+			case 0x39: cycles = 4; AND(getSrc(aby(IP))); is = 3; break;
+			case 0x21: cycles = 6; AND(getSrc(inx(IP))); is = 2; break;
+			case 0x31: cycles = 5; AND(getSrc(iny(IP))); is = 2; break;
 
 			// ASL (A shift left)
-			case 0x0A: cycles = 2; ASL(0, A, cycles, opcode); break;
-			case 0x06: cycles = 5; address = zpa(IP); ASL(address, getSrc(address), cycles, opcode); break;
-			case 0x16: cycles = 6; address = zpx(IP); ASL(address, getSrc(address), cycles, opcode); break;
-			case 0x0E: cycles = 6; address = abs(IP); ASL(address, getSrc(address), cycles, opcode); break;
-			case 0x1E: cycles = 7; address = abx(IP); ASL(address, getSrc(address), cycles, opcode); break;
+			case 0x0A: cycles = 2; ASL(0, A, cycles, opcode); is = 1; break;
+			case 0x06: cycles = 5; address = zpa(IP); ASL(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x16: cycles = 6; address = zpx(IP); ASL(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x0E: cycles = 6; address = abs(IP); ASL(address, getSrc(address), cycles, opcode); is = 3; break;
+			case 0x1E: cycles = 7; address = abx(IP); ASL(address, getSrc(address), cycles, opcode); is = 3; break;
 
 			// BCC (branch on C)
-			case 0x90: cycles = 2 + BCC(rel(IP)); break;
+			case 0x90: cycles = 2 + BCC(rel(IP)); is = 2; break;
 
 			// BCS (branch on carry set)
-			case 0xB0: cycles = 2 + BCS(rel(IP)); break;
+			case 0xB0: cycles = 2 + BCS(rel(IP)); is = 2; break;
 
 			// BEQ (branch on result zero)
-			case 0xF0: cycles = 2 + BEQ(rel(IP)); break;
+			case 0xF0: cycles = 2 + BEQ(rel(IP)); is = 2; break;
 
 			// BIT (test bits in memory with A)
-			case 0x24: cycles = 3; BIT(getSrc(zpa(IP))); break;
-			case 0x2C: cycles = 4; BIT(getSrc(abs(IP))); break;
+			case 0x24: cycles = 3; BIT(getSrc(zpa(IP))); is = 2; break;
+			case 0x2C: cycles = 4; BIT(getSrc(abs(IP))); is = 3; break;
 
 			// BMI (branch on result minus)
-			case 0x30: cycles = 2 + BMI(rel(IP)); break;
+			case 0x30: cycles = 2 + BMI(rel(IP)); is = 2; break;
 
 			// BNE (branch on result not zero)
-			case 0xD0: cycles = 2 + BNE(rel(IP)); break;
+			case 0xD0: cycles = 2 + BNE(rel(IP)); is = 2; break;
 
 			// BPL (branch on result plus)
-			case 0x10: cycles = 2 + BPL(rel(IP)); break;
+			case 0x10: cycles = 2 + BPL(rel(IP)); is = 2; break;
 
-			// BRK (force break)
-			case 0x00: cycles = 7; BRK(cycles); break;
+			// BRK (force is = 1; break)
+			case 0x00: cycles = 7; BRK(cycles); is = 1; break;
 
 			// BVC (branch on overflow clear)
-			case 0x50: cycles = 2 + BVC(rel(IP)); break;
+			case 0x50: cycles = 2 + BVC(rel(IP)); is = 2; break;
 
 			// BVS (branch on overflow set)
-			case 0x70: cycles = 2 + BVS(rel(IP)); break;
+			case 0x70: cycles = 2 + BVS(rel(IP)); is = 2; break;
 
 			// CLC (clear carry flag)
-			case 0x18: cycles = 2; CLC(); break;
+			case 0x18: cycles = 2; CLC(); is = 1; break;
 
 			// CLD (clear decimal mode)
-			case 0xD8: cycles = 2; CLD(); break;
+			case 0xD8: cycles = 2; CLD(); is = 1; break;
 
 			// CLI (clear interrupt disable bit)
-			case 0x58: cycles = 2; CLI(); break;
+			case 0x58: cycles = 2; CLI(); is = 1; break;
 
 			// CLV (clear overflow flag)
-			case 0xB8: cycles = 2; CLV(); break;
+			case 0xB8: cycles = 2; CLV(); is = 1; break;
 
 			// CMP (compare memory and A)
-			case 0xC9: cycles = 2; CMP(getSrc(imm(IP))); break;
-			case 0xC5: cycles = 2; CMP(getSrc(zpa(IP))); break;
-			case 0xD5: cycles = 4; CMP(getSrc(zpx(IP))); break;
-			case 0xCD: cycles = 4; CMP(getSrc(abs(IP))); break;
-			case 0xDD: cycles = 4; CMP(getSrc(abx(IP))); break;
-			case 0xD9: cycles = 4; CMP(getSrc(aby(IP))); break;
-			case 0xC1: cycles = 6; CMP(getSrc(inx(IP))); break;
-			case 0xD1: cycles = 5; CMP(getSrc(iny(IP))); break;
+			case 0xC9: cycles = 2; CMP(getSrc(imm(IP))); is = 2; break;
+			case 0xC5: cycles = 2; CMP(getSrc(zpa(IP))); is = 2; break;
+			case 0xD5: cycles = 4; CMP(getSrc(zpx(IP))); is = 2; break;
+			case 0xCD: cycles = 4; CMP(getSrc(abs(IP))); is = 3; break;
+			case 0xDD: cycles = 4; CMP(getSrc(abx(IP))); is = 3; break;
+			case 0xD9: cycles = 4; CMP(getSrc(aby(IP))); is = 3; break;
+			case 0xC1: cycles = 6; CMP(getSrc(inx(IP))); is = 2; break;
+			case 0xD1: cycles = 5; CMP(getSrc(iny(IP))); is = 2; break;
 
 			// CPX (compare memory and X)
-			case 0xE0: cycles = 2; CPX(getSrc(imm(IP))); break;
-			case 0xE4: cycles = 3; CPX(getSrc(zpa(IP))); break;
-			case 0xEC: cycles = 4; CPX(getSrc(abs(IP))); break;
+			case 0xE0: cycles = 2; CPX(getSrc(imm(IP))); is = 2; break;
+			case 0xE4: cycles = 3; CPX(getSrc(zpa(IP))); is = 2; break;
+			case 0xEC: cycles = 4; CPX(getSrc(abs(IP))); is = 3; break;
 
 			// CPY (compare memory and Y)
-			case 0xC0: cycles = 2; CPY(getSrc(imm(IP))); break;
-			case 0xC4: cycles = 3; CPY(getSrc(zpa(IP))); break;
-			case 0xCC: cycles = 4; CPY(getSrc(abs(IP))); break;
+			case 0xC0: cycles = 2; CPY(getSrc(imm(IP))); is = 2; break;
+			case 0xC4: cycles = 3; CPY(getSrc(zpa(IP))); is = 2; break;
+			case 0xCC: cycles = 4; CPY(getSrc(abs(IP))); is = 3; break;
 
 			// DEC (decrement memory)
-			case 0xC6: cycles = 5; address = zpa(IP); DEC(address, getSrc(address), cycles); break;
-			case 0xD6: cycles = 6; address = zpx(IP); DEC(address, getSrc(address), cycles); break;
-			case 0xCE: cycles = 6; address = abs(IP); DEC(address, getSrc(address), cycles); break;
-			case 0xDE: cycles = 7; address = abx(IP); DEC(address, getSrc(address), cycles); break;
+			case 0xC6: cycles = 5; address = zpa(IP); DEC(address, getSrc(address), cycles); is = 2; break;
+			case 0xD6: cycles = 6; address = zpx(IP); DEC(address, getSrc(address), cycles); is = 2; break;
+			case 0xCE: cycles = 6; address = abs(IP); DEC(address, getSrc(address), cycles); is = 3; break;
+			case 0xDE: cycles = 7; address = abx(IP); DEC(address, getSrc(address), cycles); is = 3; break;
 
 			// DEX (decrement X)
-			case 0xCA: cycles = 2; DEX(); break;
+			case 0xCA: cycles = 2; DEX(); is = 1; break;
 
 			// DEY (decrement Y)
-			case 0x88: cycles = 2; DEY(); break;
+			case 0x88: cycles = 2; DEY(); is = 1; break;
 			
 			// EOR (exclusive-or memory with A)
-			case 0x49: cycles = 2; EOR(getSrc(imm(IP))); break;
-			case 0x45: cycles = 3; EOR(getSrc(zpa(IP))); break;
-			case 0x55: cycles = 4; EOR(getSrc(zpx(IP))); break;
-			case 0x40: cycles = 4; EOR(getSrc(abs(IP))); break;
-			case 0x5D: cycles = 4; EOR(getSrc(abx(IP))); break;
-			case 0x59: cycles = 4; EOR(getSrc(aby(IP))); break;
-			case 0x41: cycles = 6; EOR(getSrc(inx(IP))); break;
-			case 0x51: cycles = 5; EOR(getSrc(iny(IP))); break;
+			case 0x49: cycles = 2; EOR(getSrc(imm(IP))); is = 2; break;
+			case 0x45: cycles = 3; EOR(getSrc(zpa(IP))); is = 2; break;
+			case 0x55: cycles = 4; EOR(getSrc(zpx(IP))); is = 2; break;
+			case 0x40: cycles = 4; EOR(getSrc(abs(IP))); is = 3; break;
+			case 0x5D: cycles = 4; EOR(getSrc(abx(IP))); is = 3; break;
+			case 0x59: cycles = 4; EOR(getSrc(aby(IP))); is = 3; break;
+			case 0x41: cycles = 6; EOR(getSrc(inx(IP))); is = 2; break;
+			case 0x51: cycles = 5; EOR(getSrc(iny(IP))); is = 2; break;
 
 			// INC (increment memory)
-			case 0xE6: cycles = 5; address = zpa(IP); INC(address, getSrc(address), cycles); break;
-			case 0xF6: cycles = 6; address = zpx(IP); INC(address, getSrc(address), cycles); break;
-			case 0xEE: cycles = 6; address = abs(IP); INC(address, getSrc(address), cycles); break;
-			case 0xFE: cycles = 7; address = abx(IP); INC(address, getSrc(address), cycles); break;
+			case 0xE6: cycles = 5; address = zpa(IP); INC(address, getSrc(address), cycles); is = 2; break;
+			case 0xF6: cycles = 6; address = zpx(IP); INC(address, getSrc(address), cycles); is = 2; break;
+			case 0xEE: cycles = 6; address = abs(IP); INC(address, getSrc(address), cycles); is = 3; break;
+			case 0xFE: cycles = 7; address = abx(IP); INC(address, getSrc(address), cycles); is = 3; break;
 
 			// INX (increment X)
-			case 0xE8: cycles = 2; INX(); break;
+			case 0xE8: cycles = 2; INX(); is = 1; break;
 
 			// INY (increment Y)
-			case 0xC8: cycles = 2; INY(); break;
+			case 0xC8: cycles = 2; INY(); is = 1; break;
 
 			// JMP (jump)
-			case 0x4C: cycles = 3; JMP(abs(IP)); break;
-			case 0x6C: cycles = 5; JMP(ind(IP)); break;
+			case 0x4C: cycles = 3; JMP(abs(IP)); is = 3; break;
+			case 0x6C: cycles = 5; JMP(ind(IP)); is = 3; break;
 
 			// JSR (jump to subroutine)
-			case 0x20: cycles = 6; JSR(abs(IP), cycles); break;
+			case 0x20: cycles = 6; JSR(abs(IP), cycles); is = 3; break;
 
 			// LDA (load A with memory)
-			case 0xA9: cycles = 2; LDA(getSrc(imm(IP))); break;
-			case 0xA5: cycles = 3; LDA(getSrc(zpa(IP))); break;
-			case 0xB5: cycles = 4; LDA(getSrc(zpx(IP))); break;
-			case 0xAD: cycles = 4; LDA(getSrc(abs(IP))); break;
-			case 0xBD: cycles = 4; LDA(getSrc(abx(IP))); break;
-			case 0xB9: cycles = 4; LDA(getSrc(aby(IP))); break;
-			case 0xA1: cycles = 6; LDA(getSrc(inx(IP))); break;
-			case 0xB1: cycles = 5; LDA(getSrc(iny(IP))); break;
+			case 0xA9: cycles = 2; LDA(getSrc(imm(IP))); is = 2; break;
+			case 0xA5: cycles = 3; LDA(getSrc(zpa(IP))); is = 2; break;
+			case 0xB5: cycles = 4; LDA(getSrc(zpx(IP))); is = 2; break;
+			case 0xAD: cycles = 4; LDA(getSrc(abs(IP))); is = 3; break;
+			case 0xBD: cycles = 4; LDA(getSrc(abx(IP))); is = 3; break;
+			case 0xB9: cycles = 4; LDA(getSrc(aby(IP))); is = 3; break;
+			case 0xA1: cycles = 6; LDA(getSrc(inx(IP))); is = 2; break;
+			case 0xB1: cycles = 5; LDA(getSrc(iny(IP))); is = 2; break;
 
 			// LDX (load X with memory)
-			case 0xA2: cycles = 2; LDX(getSrc(imm(IP))); break;
-			case 0xA6: cycles = 3; LDX(getSrc(zpa(IP))); break;
-			case 0xB6: cycles = 4; LDX(getSrc(zpx(IP))); break;
-			case 0xAE: cycles = 4; LDX(getSrc(abs(IP))); break;
-			case 0xBE: cycles = 4; LDX(getSrc(aby(IP))); break;
+			case 0xA2: cycles = 2; LDX(getSrc(imm(IP))); is = 2; break;
+			case 0xA6: cycles = 3; LDX(getSrc(zpa(IP))); is = 2; break;
+			case 0xB6: cycles = 4; LDX(getSrc(zpx(IP))); is = 2; break;
+			case 0xAE: cycles = 4; LDX(getSrc(abs(IP))); is = 3; break;
+			case 0xBE: cycles = 4; LDX(getSrc(aby(IP))); is = 3; break;
 
 			// LDY (load Y with memory)
-			case 0xA0: cycles = 2; LDY(getSrc(imm(IP))); break;
-			case 0xA4: cycles = 3; LDY(getSrc(zpa(IP))); break;
-			case 0xB4: cycles = 4; LDY(getSrc(zpx(IP))); break;
-			case 0xAC: cycles = 4; LDY(getSrc(abs(IP))); break;
-			case 0xBC: cycles = 4; LDY(getSrc(aby(IP))); break;
+			case 0xA0: cycles = 2; LDY(getSrc(imm(IP))); is = 2; break;
+			case 0xA4: cycles = 3; LDY(getSrc(zpa(IP))); is = 2; break;
+			case 0xB4: cycles = 4; LDY(getSrc(zpx(IP))); is = 2; break;
+			case 0xAC: cycles = 4; LDY(getSrc(abs(IP))); is = 3; break;
+			case 0xBC: cycles = 4; LDY(getSrc(aby(IP))); is = 3; break;
 
 			// LSR (shift right)
-			case 0x4A: cycles = 2; LSR(0, A, cycles, opcode); break;
-			case 0x46: cycles = 5; address = zpa(IP); LSR(address, getSrc(address), cycles, opcode); break;
-			case 0x56: cycles = 6; address = zpx(IP); LSR(address, getSrc(address), cycles, opcode); break;
-			case 0x4E: cycles = 6; address = abs(IP); LSR(address, getSrc(address), cycles, opcode); break;
-			case 0x5E: cycles = 7; address = abx(IP); LSR(address, getSrc(address), cycles, opcode); break;
+			case 0x4A: cycles = 2; LSR(0, A, cycles, opcode); is = 1; break;
+			case 0x46: cycles = 5; address = zpa(IP); LSR(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x56: cycles = 6; address = zpx(IP); LSR(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x4E: cycles = 6; address = abs(IP); LSR(address, getSrc(address), cycles, opcode); is = 3; break;
+			case 0x5E: cycles = 7; address = abx(IP); LSR(address, getSrc(address), cycles, opcode); is = 3; break;
 
 			// NOP (no operation)
-			case 0xEA: cycles = 2; break;
+			case 0xEA: cycles = 2; is = 1; break;
 
 			// ORA (OR memory with A)
-			case 0x09: cycles = 2; ORA(getSrc(imm(IP))); break;
-			case 0x05: cycles = 3; ORA(getSrc(zpa(IP))); break;
-			case 0x15: cycles = 4; ORA(getSrc(zpx(IP))); break;
-			case 0x0D: cycles = 4; ORA(getSrc(abs(IP))); break;
-			case 0x1D: cycles = 4; ORA(getSrc(abx(IP))); break;
-			case 0x19: cycles = 4; ORA(getSrc(aby(IP))); break;
-			case 0x01: cycles = 6; ORA(getSrc(inx(IP))); break;
-			case 0x11: cycles = 5; ORA(getSrc(iny(IP))); break;
+			case 0x09: cycles = 2; ORA(getSrc(imm(IP))); is = 2; break;
+			case 0x05: cycles = 3; ORA(getSrc(zpa(IP))); is = 2; break;
+			case 0x15: cycles = 4; ORA(getSrc(zpx(IP))); is = 2; break;
+			case 0x0D: cycles = 4; ORA(getSrc(abs(IP))); is = 3; break;
+			case 0x1D: cycles = 4; ORA(getSrc(abx(IP))); is = 3; break;
+			case 0x19: cycles = 4; ORA(getSrc(aby(IP))); is = 3; break;
+			case 0x01: cycles = 6; ORA(getSrc(inx(IP))); is = 2; break;
+			case 0x11: cycles = 5; ORA(getSrc(iny(IP))); is = 2; break;
 
 			// PHA (push A on stack)
-			case 0x48: cycles = 3; PHA(cycles); break;
+			case 0x48: cycles = 3; PHA(cycles); is = 1; break;
 
 			// PHA (push SP on stack)
-			case 0x08: cycles = 3; PHP(cycles); break;
+			case 0x08: cycles = 3; PHP(cycles); is = 1; break;
 
 			// PLA (push A from stack)
-			case 0x68: cycles = 4; PLA(); break;
+			case 0x68: cycles = 4; PLA(); is = 1; break;
 
 			// PLA (push A from stack)
-			case 0x28: cycles = 4; PLP(); break;
+			case 0x28: cycles = 4; PLP(); is = 1; break;
 
 			// ROL (rotate one bit left)
-			case 0x2A: cycles = 2; ROL(0, A, cycles, opcode); break;
-			case 0x26: cycles = 5; address = zpa(IP); ROL(address, getSrc(address), cycles, opcode); break;
-			case 0x36: cycles = 6; address = zpx(IP); ROL(address, getSrc(address), cycles, opcode); break;
-			case 0x2E: cycles = 6; address = abs(IP); ROL(address, getSrc(address), cycles, opcode); break;
-			case 0x3E: cycles = 7; address = abx(IP); ROL(address, getSrc(address), cycles, opcode); break;
+			case 0x2A: cycles = 2; ROL(0, A, cycles, opcode); is = 1; break;
+			case 0x26: cycles = 5; address = zpa(IP); ROL(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x36: cycles = 6; address = zpx(IP); ROL(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x2E: cycles = 6; address = abs(IP); ROL(address, getSrc(address), cycles, opcode); is = 3; break;
+			case 0x3E: cycles = 7; address = abx(IP); ROL(address, getSrc(address), cycles, opcode); is = 3; break;
 
 			// ROR (rotate one bit right)
-			case 0x6A: cycles = 2; ROR(0, A, cycles, opcode); break;
-			case 0x66: cycles = 5; address = zpa(IP); ROR(address, getSrc(address), cycles, opcode); break;
-			case 0x76: cycles = 6; address = zpx(IP); ROR(address, getSrc(address), cycles, opcode); break;
-			case 0x6E: cycles = 6; address = abs(IP); ROR(address, getSrc(address), cycles, opcode); break;
-			case 0x7E: cycles = 7; address = abx(IP); ROR(address, getSrc(address), cycles, opcode); break;
+			case 0x6A: cycles = 2; ROR(0, A, cycles, opcode); is = 1; break;
+			case 0x66: cycles = 5; address = zpa(IP); ROR(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x76: cycles = 6; address = zpx(IP); ROR(address, getSrc(address), cycles, opcode); is = 2; break;
+			case 0x6E: cycles = 6; address = abs(IP); ROR(address, getSrc(address), cycles, opcode); is = 3; break;
+			case 0x7E: cycles = 7; address = abx(IP); ROR(address, getSrc(address), cycles, opcode); is = 3; break;
 
 			// RTI (return from interrupt)
-			case 0x4D: cycles = 6; RTI(); break;
+			case 0x4D: cycles = 6; RTI(); is = 1; break;
 
 			// RTS (return from subroutine)
-			case 0x60: cycles = 6; RTS(); break;
+			case 0x60: cycles = 6; RTS(); is = 1; break;
 
 			// SBC (substract from A with carry)
-			case 0xE9: cycles = 2; SBC(getSrc(imm(IP))); break;
-			case 0xE5: cycles = 3; SBC(getSrc(zpa(IP))); break;
-			case 0xF5: cycles = 4; SBC(getSrc(zpx(IP))); break;
-			case 0xED: cycles = 4; SBC(getSrc(abs(IP))); break;
-			case 0xFD: cycles = 4; SBC(getSrc(abx(IP))); break;
-			case 0xF9: cycles = 4; SBC(getSrc(aby(IP))); break;
-			case 0xE1: cycles = 6; SBC(getSrc(inx(IP))); break;
-			case 0xF1: cycles = 5; SBC(getSrc(iny(IP))); break;
+			case 0xE9: cycles = 2; SBC(getSrc(imm(IP))); is = 2; break;
+			case 0xE5: cycles = 3; SBC(getSrc(zpa(IP))); is = 2; break;
+			case 0xF5: cycles = 4; SBC(getSrc(zpx(IP))); is = 2; break;
+			case 0xED: cycles = 4; SBC(getSrc(abs(IP))); is = 3; break;
+			case 0xFD: cycles = 4; SBC(getSrc(abx(IP))); is = 3; break;
+			case 0xF9: cycles = 4; SBC(getSrc(aby(IP))); is = 3; break;
+			case 0xE1: cycles = 6; SBC(getSrc(inx(IP))); is = 2; break;
+			case 0xF1: cycles = 5; SBC(getSrc(iny(IP))); is = 2; break;
 
 			// SEC (set carry flag)
-			case 0x38: cycles = 2; SEC(); break;
+			case 0x38: cycles = 2; SEC(); is = 1; break;
 
 			// SED (set decimal mode)
-			case 0xF8: cycles = 2; SED(); break;
+			case 0xF8: cycles = 2; SED(); is = 1; break;
 
 		    // SEI (set interrupt disable status)
-			case 0x78: cycles = 2; SEC(); break;
+			case 0x78: cycles = 2; SEC(); is = 1; break;
 
 		    // STA (store A in memory)
-			case 0x85: cycles = 3; STA(zpa(IP), cycles); break;
-			case 0x95: cycles = 4; STA(zpx(IP), cycles); break;
-			case 0x8D: cycles = 4; STA(abs(IP), cycles); break;
-			case 0x9D: cycles = 5; STA(abx(IP), cycles); break;
-			case 0x99: cycles = 5; STA(aby(IP), cycles); break;
-			case 0x81: cycles = 6; STA(inx(IP), cycles); break;
-			case 0x91: cycles = 6; STA(iny(IP), cycles); break;
+			case 0x85: cycles = 3; STA(zpa(IP), cycles); is = 2; break;
+			case 0x95: cycles = 4; STA(zpx(IP), cycles); is = 2; break;
+			case 0x8D: cycles = 4; STA(abs(IP), cycles); is = 3; break;
+			case 0x9D: cycles = 5; STA(abx(IP), cycles); is = 3; break;
+			case 0x99: cycles = 5; STA(aby(IP), cycles); is = 3; break;
+			case 0x81: cycles = 6; STA(inx(IP), cycles); is = 2; break;
+			case 0x91: cycles = 6; STA(iny(IP), cycles); is = 2; break;
 
 		    // STX (store X in memory)
-			case 0x86: cycles = 3; STX(zpa(IP), cycles); break;
-			case 0x96: cycles = 4; STX(zpy(IP), cycles); break;
-			case 0x8E: cycles = 4; STX(abs(IP), cycles); break;
+			case 0x86: cycles = 3; STX(zpa(IP), cycles); is = 2; break;
+			case 0x96: cycles = 4; STX(zpy(IP), cycles); is = 2; break;
+			case 0x8E: cycles = 4; STX(abs(IP), cycles); is = 3; break;
 
 		    // STY (store Y in memory)
-			case 0x84: cycles = 3; STY(zpa(IP), cycles); break;
-			case 0x94: cycles = 4; STY(zpx(IP), cycles); break;
-			case 0x8C: cycles = 4; STY(abs(IP), cycles); break;
+			case 0x84: cycles = 3; STY(zpa(IP), cycles); is = 2; break;
+			case 0x94: cycles = 4; STY(zpx(IP), cycles); is = 2; break;
+			case 0x8C: cycles = 4; STY(abs(IP), cycles); is = 3; break;
 			
 			// TAX (transfer A into X)
-			case 0xAA: cycles = 2; TAX(); break;
+			case 0xAA: cycles = 2; TAX(); is = 1; break;
 
 			// TAY (transfer A into Y)
-			case 0xA8: cycles = 2; TAY(); break;
+			case 0xA8: cycles = 2; TAY(); is = 1; break;
 
 			// TSX (transfer SP into X)
-			case 0xBA: cycles = 2; TSX(); break;
+			case 0xBA: cycles = 2; TSX(); is = 1; break;
 
 			// TXA (transfer X into A)
-			case 0x8A: cycles = 2; TXA(); break;
+			case 0x8A: cycles = 2; TXA(); is = 1; break;
 
 			// TXS (transfer X into SP)
-			case 0x9A: cycles = 2; TXS(); break;
+			case 0x9A: cycles = 2; TXS(); is = 1; break;
 
 			// TYA (transfer Y into A)
-			case 0x98: cycles = 2; TYA(); break;
+			case 0x98: cycles = 2; TYA(); is = 1; break;
 		}
 
 		if(add == IP)
-			IP += instructionSize(IP);
+			IP += is;
 
 		return cycles;
 	}
