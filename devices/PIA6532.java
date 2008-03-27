@@ -19,14 +19,14 @@ class PIA6532 extends Device
 	final int TIM64T = 0x296;
 	final int T1024T = 0x297;
 
-	int interval = 0, timer = 0;
+	int interval = 0, time = 0;
 
 	public String name() { return "PIA 6532"; }
 
 	public void reset()
 	{
 		interval = 0;
-		timer = 0;
+		time = 0;
 
 		/* Set SWCHA to 0xff, since each bit holds the value of 1 when
 		 * the joystick isn't being pressed to any direction */
@@ -36,8 +36,8 @@ class PIA6532 extends Device
 
 	public void step(int cycles)
 	{
-		timer -= cycles;
-		JEmu.ram[INTIM] = (short)(timer >> interval);
+		time -= cycles;
+		JEmu.ram[INTIM] = (short)(time >> interval);
 	}
 
 	public boolean memorySet(int pos, short data, int cycles)
@@ -46,22 +46,22 @@ class PIA6532 extends Device
 		{
 			case TIM1T:
 				interval = 0;
-				timer = data << interval;
+				time = data << interval;
 				JEmu.ram[INTIM] = data;
 				return false;
 			case TIM8T:
 				interval = 3;
-				timer = data << interval;
+				time = data << interval;
 				JEmu.ram[INTIM] = data;
 				return false;
 			case TIM64T:
 				interval = 6;
-				timer = data << interval;
+				time = data << interval;
 				JEmu.ram[INTIM] = data;
 				return false;
 			case T1024T:
 				interval = 10;
-				timer = data << interval;
+				time = data << interval;
 				JEmu.ram[INTIM] = data;
 				return false;
 		}
@@ -73,7 +73,7 @@ class PIA6532 extends Device
 		String s;
 		s = "<table border='0'>";
 		s += "<tr><td>Interval:</td><td><b>" + interval + "</b></td></tr>";
-		s += "<tr><td>Timer:</td><td><b>" + timer + "</b></td></tr>";
+		s += "<tr><td>Timer:</td><td><b>" + time + "</b></td></tr>";
 		s += "</table>";
 
 		JSObject pia_table = (JSObject)JEmu.Window.eval("document.getElementById('" + htmlField + "');");
