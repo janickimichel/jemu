@@ -303,65 +303,65 @@ class MOS6502 extends CPU
 
 	private int zpa(int pos)
 	{
-		return JEmu.ram[pos + 1];
+		return JEmu.platform.getRAM(pos + 1);
 	}
 
 	private int zpx(int pos)
 	{
-		return JEmu.ram[pos + 1] + X;
+		return JEmu.platform.getRAM(pos + 1) + X;
 	}
 
 	private int zpy(int pos)
 	{
-		return JEmu.ram[pos + 1] + Y;
+		return JEmu.platform.getRAM(pos + 1) + Y;
 	}
 
 	private int abs(int pos)
 	{
-		return (JEmu.ram[pos+1]|(JEmu.ram[pos+2])<<8);
+		return (JEmu.platform.getRAM(pos+1)|(JEmu.platform.getRAM(pos+2))<<8);
 	}
 
 	private int abx(int pos)
 	{
-		return (JEmu.ram[pos+1]|(JEmu.ram[pos+2]<<8)) + X;
+		return (JEmu.platform.getRAM(pos+1)|(JEmu.platform.getRAM(pos+2)<<8)) + X;
 	}
 
 	private int aby(int pos)
 	{
-		return (JEmu.ram[pos+1]|(JEmu.ram[pos+2]<<8)) + Y;
+		return (JEmu.platform.getRAM(pos+1)|(JEmu.platform.getRAM(pos+2)<<8)) + Y;
 	}
 
 	private int inx(int pos)
 	{
-		int lsrc = JEmu.ram[pos + 1];
-		return ((lsrc+X)|(JEmu.ram[lsrc+X+1]<<8));
+		int lsrc = JEmu.platform.getRAM(pos + 1);
+		return ((lsrc+X)|(JEmu.platform.getRAM(lsrc+X+1)<<8));
 	}
 
 	private int iny(int pos)
 	{
-		int lsrc = JEmu.ram[pos + 1];
+		int lsrc = JEmu.platform.getRAM(pos + 1);
 		return ((lsrc)|((lsrc+1)<<8)) + Y;
 	}
 
 	private int rel(int pos) // WARNING: returns src, not address
 	{
-		if(JEmu.ram[pos + 1] > 127)
-			return (pos + instructionSize(pos) - (0x100 - JEmu.ram[pos + 1]));
+		if(JEmu.platform.getRAM(pos + 1) > 127)
+			return (pos + instructionSize(pos) - (0x100 - JEmu.platform.getRAM(pos + 1)));
 		else
-			return (pos + instructionSize(pos) + JEmu.ram[pos + 1]);
+			return (pos + instructionSize(pos) + JEmu.platform.getRAM(pos + 1));
 	}
 
 	private int ind(int pos)
 	{
-		int lsrc = JEmu.ram[pos + 1];
-		int hsrc = JEmu.ram[pos + 2];
+		int lsrc = JEmu.platform.getRAM(pos + 1);
+		int hsrc = JEmu.platform.getRAM(pos + 2);
 		int src = ((lsrc)|((hsrc)<<8));
-		return (JEmu.ram[src] | JEmu.ram[src+1] << 8);
+		return (JEmu.platform.getRAM(src) | JEmu.platform.getRAM(src+1) << 8);
 	}
 
 	private int getSrc(int address)
 	{
-		return JEmu.ram[address];
+		return JEmu.platform.getRAM(address);
 	}
 
 
@@ -489,7 +489,7 @@ class MOS6502 extends CPU
 		B = true;
 		PUSH(SP, cycles);
 		I = true;
-		IP = (JEmu.ram[0xFFFE]|(JEmu.ram[0xFFFF]<<8));
+		IP = (JEmu.platform.getRAM(0xFFFE)|(JEmu.platform.getRAM(0xFFFF)<<8));
 	}
 
 	private int BVC(int src)
@@ -840,7 +840,7 @@ class MOS6502 extends CPU
 	}
 	private int PULL()
 	{
-		return JEmu.ram[(++SP)+0x100];
+		return JEmu.platform.getRAM((++SP)+0x100);
 	}
 
 
@@ -852,7 +852,7 @@ class MOS6502 extends CPU
 	 */
 	protected int instructionSize(int pos)
 	{
-			short opcode = JEmu.ram[pos];
+			int opcode = JEmu.ram[pos];
 
 			/* find out how many bytes this opcode uses */
 			switch(opcode)
@@ -1025,8 +1025,8 @@ class MOS6502 extends CPU
 	protected String debugInstruction(int pos)
 	{
 		int instSize = instructionSize(pos);
-		short lsrc = 0, hsrc = 0;
-		short opcode = JEmu.ram[pos];
+		int lsrc = 0, hsrc = 0;
+		int opcode = JEmu.ram[pos];
 		int src = 0;
 
 		if(instSize > 1)
@@ -1860,8 +1860,8 @@ class MOS6502 extends CPU
 	 */
 	private int addressing(int pos, int instSize)
 	{
-		short lsrc = 0, hsrc = 0;
-		short opcode = JEmu.ram[pos];
+		int lsrc = 0, hsrc = 0;
+		int opcode = JEmu.ram[pos];
 		int src = 0, address;
 
 		if(instSize > 1)

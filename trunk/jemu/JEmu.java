@@ -1,13 +1,16 @@
 import netscape.javascript.JSObject;
 import javax.swing.JApplet;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 import java.net.*;
 import java.io.*;
 
-abstract class JEmu extends JApplet implements Runnable
+abstract class JEmu 
+	extends JApplet 
+	implements Runnable, KeyListener, FocusListener //, MouseListener
 {
 	/*
 	 * Fields
@@ -17,17 +20,30 @@ abstract class JEmu extends JApplet implements Runnable
 	public List<Device> devices = new ArrayList<Device>(); // emulator other devices
 
 	protected MemoryMaps memoryMaps = new MemoryMaps();
-	public static short ram[]; // RAM memory
+	public static int ram[]; // RAM memory
 
 	public static JSObject Window = null; // HTML window (javascript object)
 	public static JEmu platform; // myself
 
-	public static boolean running = false; // is the emulator running?
 	private Thread thread = null; // thread that runs the emulator
+	public static boolean running = false; // is the emulator running?
+	private boolean focused = false; // does the emulator has focus?
+	private boolean ROMLoaded = false; // was a ROM loaded?
+
 	public int frameskip = 1; // video frameskip (TODO - move to video?)
 	public static int currentFrame = 0; // used to control frameskip
+	private long timer; // control the time between frames
 
 	private Timer updatingTimer = new Timer();
+
+	// define if the user is debugging or just playing
+	private boolean debugging = false;
+	public void setDebugging(boolean d) 
+	{ 
+		debugging = d; 
+		if(debugging)
+			focused = true;
+	}
 
 	//
 	// Applet methods
@@ -36,6 +52,13 @@ abstract class JEmu extends JApplet implements Runnable
 	{
 		JEmu.platform = this;
 		// Timer.useTimer = true;
+	}
+
+	public void init()
+	{
+		addKeyListener(this);
+		addFocusListener(this);
+		// addMouseListener(this);
 	}
 
 	public void start()
@@ -63,9 +86,7 @@ abstract class JEmu extends JApplet implements Runnable
 		catch(netscape.javascript.JSException e)
 		{
 			// using appletviewer
-			loadROM("rom/atari2600/dot.bin");
-			reset();
-			runButton();
+			loadROM("rom/atari2600/tennis.bin");
 		}
 	}
 
@@ -77,6 +98,23 @@ abstract class JEmu extends JApplet implements Runnable
 	public void paint(Graphics g) 
 	{
 		g.drawImage(video.image, 0, 0, this);
+		if(!focused)
+		{
+			g.setColor(Color.BLACK);
+			g.fillRect(8, 8, 110, 20);
+			g.setColor(Color.WHITE);
+			g.drawString("Click here to play", 15, 22);
+			g.drawString("Click here to play", 16, 22);
+		}
+		if(!ROMLoaded)
+		{
+			g.setColor(Color.BLACK);
+			g.fillRect(8, 8, 110, 20);
+			g.setColor(Color.WHITE);
+			g.drawString("Choose a ROM to load", 15, 22);
+			g.drawString("Choose a ROM to load", 16, 22);
+		}
+
 	}
 
 	public void destroy()
@@ -86,15 +124,35 @@ abstract class JEmu extends JApplet implements Runnable
 		System.out.println("PIA    = " + devices.get(0).timer.timeByFrame());
 		System.out.println("Update = " + updatingTimer.timeByFrame());
 	}
+	
+	// 
+	// events
+	//
+	public void keyPressed(KeyEvent e) {}  // must be implemented by child
+	public void keyReleased(KeyEvent e) {} // must be implemented by child
+	public void keyTyped(KeyEvent e) {}
+	public void focusGained(FocusEvent evt) 
+	{ 
+		focused = true; 
+	}
+
+	public void focusLost(FocusEvent evt) 
+	{
+		if(!debugging)
+		{
+			focused = false; 
+			repaint();
+		}
+	}
 
 	//
 	// thread methods
 	//
 	public void run()
 	{
-		long timer = ((new Date()).getTime() + (1000 / video.fps));
+		timer = (System.currentTimeMillis() + (1000 / video.fps));
 
-		if(cpu.breakPoints.hasBkp())
+		if(debugging)
 		{
 			while(JEmu.running)
 			{
@@ -109,13 +167,7 @@ abstract class JEmu extends JApplet implements Runnable
 				
 				// check if needs to update screen
 				if(video.screenDone)
-				{
-					video.drawScreen();
-					video.screenDone = false;
-					while(timer > (new Date()).getTime())
-						;
-					timer = ((new Date()).getTime() + (1000 / video.fps));
-				}
+					updateScreen();
 			}
 		}
 		else // no breakpoints 
@@ -127,28 +179,12 @@ abstract class JEmu extends JApplet implements Runnable
 				// check if needs to update screen
 				if(video.screenDone)
 				{
-					updatingTimer.start();
+					updateScreen();
 
-					if(JEmu.currentFrame == 0)
-					{
-						video.drawScreen();
-						getToolkit().sync();
-					}
-
-					try
-					{
-						Thread.sleep(timer - (new Date()).getTime());
-					} catch(InterruptedException e) {}
-					  catch(java.lang.IllegalArgumentException ex) {}
-					timer = ((new Date()).getTime() + (1000 / video.fps));
-
-					video.screenDone = false;
-					updatingTimer.stop();
-					Timer.frames++;
-
-					JEmu.currentFrame--;
-					if(JEmu.currentFrame < 0)
-						JEmu.currentFrame = frameskip;
+					while(!focused) // check if the applet has focus
+						try {
+							Thread.sleep(100);
+						} catch(InterruptedException e) {}
 				}
 			}
 		}
@@ -165,6 +201,33 @@ abstract class JEmu extends JApplet implements Runnable
 		{
 		}
 		rebuildDebuggers();
+	}
+
+	// update the screen
+	public void updateScreen()
+	{
+		updatingTimer.start();
+
+		if(JEmu.currentFrame == 0)
+		{
+			video.drawScreen();
+			getToolkit().sync();
+		}
+
+		try
+		{
+			Thread.sleep(timer - System.currentTimeMillis());
+		} catch(InterruptedException e) {}
+		  catch(java.lang.IllegalArgumentException ex) {}
+		timer = (System.currentTimeMillis() + (1000 / video.fps));
+
+		video.screenDone = false;
+		updatingTimer.stop();
+		Timer.frames++;
+
+		JEmu.currentFrame--;
+		if(JEmu.currentFrame < 0)
+			JEmu.currentFrame = frameskip;
 	}
 
 	// start execution thread
@@ -200,7 +263,7 @@ abstract class JEmu extends JApplet implements Runnable
 	public void loadROM(String file)
 	{
 		URL url = null;
-		List<Short> d = new ArrayList<Short>();
+		List<Integer> d = new ArrayList<Integer>();
 
 		try
 		{
@@ -213,41 +276,47 @@ abstract class JEmu extends JApplet implements Runnable
 			// BufferedReader bf = new BufferedReader(new InputStreamReader(in));
 			int c;
 			while((c = in.read()) != -1)
-				d.add(((Integer)c).shortValue());
+				d.add((Integer)c);
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
 		}
 		loadROM(d);
+		ROMLoaded = true;
 		System.out.println("ROM loaded.");
-		rebuildDebuggers();
+		reset();
+		if(debugging)
+		{
+			rebuildDebuggers();
+			repaint();
+			JSObject use_debugger = (JSObject)JEmu.Window.eval("document.getElementById('use_debugger');");
+			use_debugger.setMember("disabled", true);
+		}
+		else
+		{
+			JEmu.running = false;
+			runButton();
+		}
 	}
 
 	void initRAM(int size)
 	{
 		System.out.print("Initializing memory... ");
-		ram = new short[size];
-		for(short b: ram)
+		ram = new int[size];
+		for(int b: ram)
 			b = 0;
 		System.out.println("ok!");
 	}
 
-	void setRAM(int pos, short d, int cycles)
+	void setRAMDirect(int pos, int d)
 	{
-		Device dev = memoryMaps.device(pos);
-		d = (short)(d & 0xff);
-		if(dev == null)
-			JEmu.ram[pos] = d;
-		else
-			if(dev.memorySet(pos, d, cycles))
-				JEmu.ram[pos] = d;
+		JEmu.ram[pos] = d & 0xff;
 	}
 
-	// TODO - do something about this waste of precious time
-	void setRAM(int pos, int d, int cycles)
+	int getRAM(int pos)
 	{
-		setRAM(pos, (short)d, cycles);
+		return JEmu.ram[pos];
 	}
 
 	private void rebuildMemoryDebugger(int pos)
@@ -346,8 +415,9 @@ abstract class JEmu extends JApplet implements Runnable
 	 * Implement this
 	 */
 	public abstract void step();
-	abstract void loadROM(List<Short> d);
+	abstract void loadROM(List<Integer> d);
 	abstract String platformName();
 	abstract void reset();
+	abstract void setRAM(int pos, int d, int cycles);
 	String hexSymbol() { return "$"; }
 }

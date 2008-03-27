@@ -86,14 +86,31 @@ function set_breakpoint(row, pos)
 	}
 }
 
+function use_debugger()
+{
+	if(document.getElementById('use_debugger').checked == true)
+		document.getElementById('debuggers').style.display = 'block';
+	else
+		document.getElementById('debuggers').style.display = 'none';
+	document.getElementById('JEmu').setDebugging(document.getElementById('use_debugger').checked);
+}
+
 </script>
 
 </head>
 <body>
-<p><applet id="JEmu" code="Atari2600" codebase="classes/" width=320 
-           height=192 mayscript></applet></p>
+	<table>
+		<tr><td><applet id="JEmu" code="Atari2600" codebase="classes/" 
+				width=320 height=192 mayscript></applet></td>
+			<td>
+				<!-- Options -->
+				<input type="checkbox" id="use_debugger" onclick="use_debugger()">Use debugger (advanced)
+			</td>
+		</tr>
+	</table>
 
 <!-- Debuggers -->
+<span id="debuggers" style="display: none;">
 <p><b>Debuggers:</b>&nbsp;
 	<span id="cpu_bt"><input type="checkbox" id="display_cpu" onclick="show_cpu()"><span id="cpu_name">CPU</span></span>
 	<span id="video_bt"><input type="checkbox" id="display_video" onclick="show_video()"><span id="video_name">Video</span></span>
@@ -106,14 +123,15 @@ function set_breakpoint(row, pos)
 	<input id="next_scanline" type="button" value="Next Scanline" onclick="document.getElementById('JEmu').nextScanlineButton();">
 	<input id="next_frame" type="button" value="Next Frame" onclick="document.getElementById('JEmu').nextFrameButton();">
 </p>
+</span>
 
 <!-- ROMS -->
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/simple.bin');">Simple</a>&nbsp;
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/dot.bin');">Dot</a>&nbsp;
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/kernel1.bin');">Kernel1</a>&nbsp;
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/kernel11.bin');">Kernel11</a>&nbsp;
-<a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/kernel13.bin');">Kernel13</a>&nbsp;
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/kernel15.bin');">Kernel15</a>&nbsp;
+<a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/joy.bin');">Joy</a>&nbsp;
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/peace.bin');">Peace</a>&nbsp;
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/pitfall.bin');">Pitfall</a>&nbsp;
 

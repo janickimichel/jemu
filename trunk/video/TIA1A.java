@@ -29,6 +29,7 @@ class TIA1A extends Video
 		abstract void reset();
 		abstract void draw(int x1, int x2);
 		abstract void updateStack();
+		abstract String describe();
 	};
 
 	//
@@ -50,6 +51,11 @@ class TIA1A extends Video
 		void updateStack()
 		{
 			// updates.push(new Rect(0, 0, 1, 1));
+		}
+
+		String describe()
+		{
+			return "";
 		}
 	};
 
@@ -121,7 +127,12 @@ class TIA1A extends Video
 		}
 
 		void updateStack() {}
-	}
+
+		String describe()
+		{
+			return "";
+		}
+}
 
 	//
 	// Missile
@@ -176,6 +187,11 @@ class TIA1A extends Video
 		}
 
 		void updateStack() {}
+	
+		String describe()
+		{
+			return "";
+		}
 	}
 
 	// 
@@ -185,6 +201,11 @@ class TIA1A extends Video
 	{
 		void draw(int x1, int x2)
 		{
+		}
+
+		String describe()
+		{
+			return "";
 		}
 	}
 
@@ -207,7 +228,7 @@ class TIA1A extends Video
 	// Memory
 	//
 	int posAfter;
-	short dataAfter;
+	int dataAfter;
 
 	public String name() { return "TIA 1A"; }
 	public int height() { return 192; }
@@ -304,7 +325,7 @@ class TIA1A extends Video
 			memorySetAfter(posAfter, dataAfter, 0);
 	}
 
-	public boolean memorySet(int pos, short data, int cycles)
+	public boolean memorySet(int pos, int data, int cycles)
 	{
 		posAfter = -1;
 
@@ -348,7 +369,7 @@ class TIA1A extends Video
 		return false;
 	}
 	
-	public void memorySetAfter(int pos, short data, int cycles) 
+	public void memorySetAfter(int pos, int data, int cycles) 
 	{
 		posAfter = -1; // avoids infinite loop
 
@@ -512,37 +533,26 @@ class TIA1A extends Video
 		s = "<table border='0'>";
 		s += "<tr><td><b>x =</b></td><td>" + x + "</td></tr>";
 		s += "<tr><td><b>y =</b></td><td>" + y + "</td></tr>";
-
-		// COLUBK
-		s += "<tr>";
-		s += "<td>COLUBK</td>";
-		s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | background.color).substring(1) + "'>&nbsp;&nbsp;&nbsp;</td>";
-		for(int i=0; i<256; i++)
-			if(color[i] == background.color)
-				s += "<td>" + i + "</td>";
-		s += "</tr>";
-
-		/*
-		// Players
-		for(int i=0; i<2; i++)
-		{
-			s += "<tr>";
-			s += "<td>COLUP" + i + "</td>";
-			s += "<td span='8' style='background-color: #" + Integer.toHexString(0x1000000 | p[i].color).substring(1) + "'>&nbsp;</td>";
-			s += "</tr>";
-		}
-
-		// Missiles
-		for(int i=0; i<2; i++)
-		{
-			s += "<tr>";
-			s += "<td>M" + i + " pos</td>";
-			s += "<td>" + p[0].missile.x + "</td>";
-			s += "</tr>";
-		}
-		*/
-
 		s += "</table>";
+
+		// Sprites
+		s += "<h3>Background</h3>";
+		s += "<p>" + background.describe() + "</p>";
+
+		s += "<h3>Playfield</h3>";
+		s += "<p>" + playfield.describe() + "</p>";
+
+		s += "<h3>Player 0</h3>";
+		s += "<p>" + p[0].describe() + "</p>";
+
+		s += "<h3>Player 1</h3>";
+		s += "<p>" + p[1].describe() + "</p>";
+
+		s += "<h3>Missile 0</h3>";
+		s += "<p>" + m[0].describe() + "</p>";
+
+		s += "<h3>Missile 1</h3>";
+		s += "<p>" + m[1].describe() + "</p>";
 
 		JSObject tia_table = (JSObject)JEmu.Window.eval("document.getElementById('video_table');");
 		tia_table.setMember("innerHTML", s);

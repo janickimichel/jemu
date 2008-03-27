@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.Date;
+import java.awt.event.*;
 
 public class Atari2600 extends JEmu
 {
@@ -12,10 +13,6 @@ public class Atari2600 extends JEmu
 		pia6532 = new PIA6532();
 		devices.add(pia6532);
 		initRAM(64*1024);
-
-		memoryMaps.add(video, 0x0, 0x2c);
-		memoryMaps.add(pia6532, 0x80, 0xff);
-		memoryMaps.add(pia6532, 0x280, 0x297);
 	}
 
 	public void step()
@@ -33,13 +30,13 @@ public class Atari2600 extends JEmu
 		pia6532.timer.stop();
 	}
 
-	void loadROM(List<Short> d)
+	void loadROM(List<Integer> d)
 	{
 		int pos = 0xf000;
 
-		for(Short s: d)
+		for(Integer s: d)
 		{
-			JEmu.platform.setRAM(pos, s, 0);
+			setRAM(pos, s, 0);
 			pos++;
 		}
 
@@ -57,5 +54,85 @@ public class Atari2600 extends JEmu
 		// cpu.reset();
 		video.reset();
 		pia6532.reset();
+	}
+
+	// 
+	// Memory
+	//
+	void setRAM(int pos, int d, int cycles)
+	{
+		// memory maps & mirrors
+		if(pos <= 0x2c)
+		{
+			if(!video.memorySet(pos, d, cycles))
+				return;
+		}
+		if(pos >= 0x280 && pos <= 0x297)
+			if(!pia6532.memorySet(pos, d, cycles))
+				return;
+
+		// normal operation
+		setRAMDirect(pos, d);
+	}
+
+	void setRAMDirect(int pos, int d)
+	{
+		JEmu.ram[pos] = d & 0xff;
+	}
+
+	int getRAM(int pos)
+	{
+		if(pos >= 0x30 && pos <= 0x3f)
+			return JEmu.ram[pos & 0xf];
+		if(pos >= 0x294 && pos <= 0x297)
+			return JEmu.ram[pos - 0x10];
+		return JEmu.ram[pos];
+	}
+
+	// 
+	// Joystick & other buttons
+	// 
+	public void keyPressed(KeyEvent e)
+	{
+		switch(e.getKeyCode())
+		{
+			case KeyEvent.VK_UP:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) ^ 0x10);
+				break;
+			case KeyEvent.VK_DOWN:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) ^ 0x20);
+				break;
+			case KeyEvent.VK_LEFT:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) ^ 0x40);
+				break;
+			case KeyEvent.VK_RIGHT:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) ^ 0x80);
+				break;
+			case KeyEvent.VK_SPACE:
+				setRAMDirect(pia6532.INPT4, getRAM(pia6532.INPT4) ^ 0x80);
+				break;
+		}
+	}
+
+	public void keyReleased(KeyEvent e) 
+	{
+		switch(e.getKeyCode())
+		{
+			case KeyEvent.VK_UP:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) | 0x10);
+				break;
+			case KeyEvent.VK_DOWN:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) | 0x20);
+				break;
+			case KeyEvent.VK_LEFT:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) | 0x40);
+				break;
+			case KeyEvent.VK_RIGHT:
+				setRAMDirect(pia6532.SWCHA, getRAM(pia6532.SWCHA) | 0x80);
+				break;
+			case KeyEvent.VK_SPACE:
+				setRAMDirect(pia6532.INPT4, getRAM(pia6532.INPT4) | 0x80);
+				break;
+		}
 	}
 }
