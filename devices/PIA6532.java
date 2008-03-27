@@ -2,12 +2,12 @@ import netscape.javascript.JSObject;
 
 class PIA6532 extends Device
 {
-	final int INPT0  = 0x38;
-	final int INPT1  = 0x39;
-	final int INPT2  = 0x3A;
-	final int INPT3  = 0x3B;
-	final int INPT4  = 0x3C;
-	final int INPT5  = 0x3D;
+	final int INPT0  = 0x08;
+	final int INPT1  = 0x09;
+	final int INPT2  = 0x0A;
+	final int INPT3  = 0x0B;
+	final int INPT4  = 0x0C;
+	final int INPT5  = 0x0D;
 	final int SWCHA  = 0x280;
 	final int SWACNT = 0x281;
 	final int SWCHB  = 0x282;
@@ -30,39 +30,41 @@ class PIA6532 extends Device
 
 		/* Set SWCHA to 0xff, since each bit holds the value of 1 when
 		 * the joystick isn't being pressed to any direction */
-		JEmu.ram[SWCHA] = 0xff;
-		JEmu.ram[SWCHB] = 0xff;
+		JEmu.platform.setRAMDirect(SWCHA, 0xff);
+		JEmu.platform.setRAMDirect(SWCHB, 0xff);
+		JEmu.platform.setRAMDirect(INPT4, 0x80);
+		JEmu.platform.setRAMDirect(INPT5, 0x80);
 	}
 
 	public void step(int cycles)
 	{
 		time -= cycles;
-		JEmu.ram[INTIM] = (short)(time >> interval);
+		JEmu.platform.setRAMDirect(INTIM, (time >> interval));
 	}
 
-	public boolean memorySet(int pos, short data, int cycles)
+	public boolean memorySet(int pos, int data, int cycles)
 	{
 		switch(pos)
 		{
 			case TIM1T:
 				interval = 0;
 				time = data << interval;
-				JEmu.ram[INTIM] = data;
+				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 			case TIM8T:
 				interval = 3;
 				time = data << interval;
-				JEmu.ram[INTIM] = data;
+				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 			case TIM64T:
 				interval = 6;
 				time = data << interval;
-				JEmu.ram[INTIM] = data;
+				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 			case T1024T:
 				interval = 10;
 				time = data << interval;
-				JEmu.ram[INTIM] = data;
+				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 		}
 		return true;
@@ -74,6 +76,12 @@ class PIA6532 extends Device
 		s = "<table border='0'>";
 		s += "<tr><td>Interval:</td><td><b>" + interval + "</b></td></tr>";
 		s += "<tr><td>Timer:</td><td><b>" + time + "</b></td></tr>";
+		s += "</table>";
+		
+		s += "<h3>Registers</h3>";
+		s += "<table border='0'>";
+		s += "<tr><td>SWCHA</td><td><b>" + Integer.toBinaryString(JEmu.ram[SWCHA]) + "</b></td></tr>";
+		s += "<tr><td>INPT4</td><td><b>" + Integer.toBinaryString(JEmu.ram[INPT4]) + "</b></td></tr>";
 		s += "</table>";
 
 		JSObject pia_table = (JSObject)JEmu.Window.eval("document.getElementById('" + htmlField + "');");

@@ -9,7 +9,6 @@ all: \
 	jemu/Device.java \
 	jemu/Video.java \
 	jemu/BreakPoints.java \
-	jemu/MemoryMaps.java \
 	jemu/Rect.java \
 	jemu/Timer.java \
 	\
