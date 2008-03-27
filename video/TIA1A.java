@@ -3,6 +3,8 @@ import java.util.Stack;
 
 class TIA1A extends Video
 {
+	private final boolean[] falseArray = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+
 	//
 	// Helper functions
 	//
@@ -144,8 +146,7 @@ class TIA1A extends Video
 			distance = 1;
 			pos = 80;
 			speed = 0;
-			for(int i=0; i<160; i++)
-				pixel[i] = false;
+			System.arraycopy(falseArray, 0, pixel, 0, 160);
 		}
 
 		void move()
@@ -160,8 +161,7 @@ class TIA1A extends Video
 		{
 			boolean any = false;
 
-			for(int i = 0; i < 160; i++)
-				pixel[i] = false; // TODO do with System.arraycopy
+			System.arraycopy(falseArray, 0, pixel, 0, 160);
 
 			for(int i = 0; i < copies; i++)
 				for(int j = 0; j < size; j++)
