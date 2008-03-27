@@ -55,7 +55,7 @@ class TIA1A extends Video
 
 		String describe()
 		{
-			return "";
+			return "<table><tr><td>Color</td><td bgcolor='#" + Integer.toHexString(color) + "'>&nbsp;&nbsp;&nbsp;</td></tr></table>";
 		}
 	};
 
@@ -199,6 +199,14 @@ class TIA1A extends Video
 	//
 	private class Player extends Missile
 	{
+		boolean reflect;
+
+		void reset()
+		{
+			super.reset();
+			reflect = false;
+		}
+
 		void draw(int x1, int x2)
 		{
 		}
