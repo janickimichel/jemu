@@ -6,25 +6,24 @@ class Timer
 	public static boolean useTimer = false;
 
 	private long fullTime;
-	private long timeBegin, timeEnd;
+	private long timeBegin;
 
 	public void start()
 	{
 		if(!useTimer)
 			return;
-		timeBegin = (new Date()).getTime();
+		timeBegin = System.currentTimeMillis();
 	}
 
 	public void stop()
 	{
 		if(!useTimer)
 			return;
-		timeEnd = (new Date()).getTime();
-		fullTime += (timeEnd - timeBegin);
+		fullTime += (System.currentTimeMillis() - timeBegin);
 	}
 
 	public double timeByFrame()
 	{
-		return fullTime / frames;
+		return (double)fullTime / frames;
 	}
 }

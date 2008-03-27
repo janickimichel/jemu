@@ -130,36 +130,30 @@ class TIA1A extends Video
 		protected Missile() {}
 		Missile(int n) { this.n = n; }
 
-		protected int size;
 		protected int pos;
 		private boolean[] pixel = new boolean[160];
+		int size;
 		int speed;
-
-		// optimization
-		int op_x, op_y, op_x2, op_y2;
-		boolean op_had;
+		int copies;
+		int distance;
 
 		void reset()
 		{
 			size = 1;
+			copies = 1;
+			distance = 1;
 			pos = 80;
 			speed = 0;
 			for(int i=0; i<160; i++)
 				pixel[i] = false;
-			op_x = op_y = op_x2 = op_y2 = -1;
-		}
-
-		void setSize(int i)
-		{
-			size = i;
-			redraw();
 		}
 
 		void move()
 		{
 			pos += speed;
 			pos = adjust(pos);
-			redraw();
+			redraw(); // TODO move the image in the array, instead of
+			          //      redrawing everything
 		}
 
 		void redraw()
@@ -167,42 +161,21 @@ class TIA1A extends Video
 			boolean any = false;
 
 			for(int i = 0; i < 160; i++)
-				if(i == pos)
-				{
-					pixel[i] = true;
-					if(i < op_x || op_x == -1)
-						op_x = x;
-					if(i > op_x2 || op_x2 == -1)
-						op_x2 = x;
-				}
-				else
-					pixel[i] = false;
+				pixel[i] = false; // TODO do with System.arraycopy
 
+			for(int i = 0; i < copies; i++)
+				for(int j = 0; j < size; j++)
+					pixel[adjust(pos + j + (i * distance))] = true;
 		}
 
 		void draw(int x1, int x2)
 		{
 			for(int i = x1; i < x2; i++)
 				if(pixel[i])
-				{
 					setPixel(i, y, p[n].color);
-					op_had = true;
-				}
-
-			if(y < op_y || op_y == -1)
-				op_y = y;
-			if(y > op_y2 || op_y2 == -1)
-				op_y2 = y;
 		}
 
-		void updateStack()
-		{
-			if(op_had)
-			{
-				updates.push(new Rect(op_x*2, op_y, (op_x2+1)*2, op_y2+1));
-				op_x = op_y = op_x = op_y2 = -1;
-			}
-		}
+		void updateStack() {}
 	}
 
 	// 
@@ -443,7 +416,37 @@ class TIA1A extends Video
 						case 2: j = 4; break;
 						case 3: j = 8; break;
 					}
-					m[0].setSize(j);
+					m[0].size = j;
+					
+					i = (data & 0x7);
+					switch(i)
+					{
+						case 0: case 5: case 7:
+							m[0].copies = 1;
+							m[0].distance = 0;
+							break;
+						case 1:
+							m[0].copies = 2;
+							m[0].distance = 16;
+							break;
+						case 2:
+							m[0].copies = 2;
+							m[0].distance = 32;
+							break;
+						case 3:
+							m[0].copies = 3;
+							m[0].distance = 16;
+							break;
+						case 4:
+							m[0].copies = 2;
+							m[0].distance = 32;
+							break;
+						case 6:
+							m[0].copies = 3;
+							m[0].distance = 32;
+							break;
+					}
+					m[0].redraw();
 				}
 				break;
 
@@ -458,7 +461,7 @@ class TIA1A extends Video
 						case 2: j = 4; break;
 						case 3: j = 8; break;
 					}
-					m[1].setSize(j);
+					m[1].size = j;
 				}
 				break;
 

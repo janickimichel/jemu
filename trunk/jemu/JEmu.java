@@ -35,6 +35,7 @@ abstract class JEmu extends JApplet implements Runnable
 	public JEmu()
 	{
 		JEmu.platform = this;
+		// Timer.useTimer = true;
 	}
 
 	public void start()
@@ -63,7 +64,7 @@ abstract class JEmu extends JApplet implements Runnable
 		{
 		}
 
-		loadROM("rom/atari2600/simple.bin");
+		loadROM("rom/atari2600/dot.bin");
 		reset();
 		runButton();
 	}
