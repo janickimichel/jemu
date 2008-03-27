@@ -86,7 +86,7 @@ abstract class JEmu
 		catch(netscape.javascript.JSException e)
 		{
 			// using appletviewer
-			loadROM("rom/atari2600/tennis.bin");
+			loadROM("rom/atari2600/happy.bin");
 		}
 	}
 
