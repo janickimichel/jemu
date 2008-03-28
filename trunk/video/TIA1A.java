@@ -53,7 +53,7 @@ class TIA1A extends Video
 
 		String describe()
 		{
-			return "<table><tr><td>Color</td><td bgcolor='#" + Integer.toHexString(color) + "'>&nbsp;&nbsp;&nbsp;</td></tr></table>";
+			return "<table><tr><td>Color:&nbsp;</td><td bgcolor='#" + Integer.toHexString(color) + "'>&nbsp;&nbsp;&nbsp;</td></tr></table>";
 		}
 	};
 
@@ -96,9 +96,8 @@ class TIA1A extends Video
 				cl1 = cl2 = color;
 			else
 			{
-				cl1 = cl2 = color; // TODO
-				// cl1 = player[0].color;
-				// cl1 = player[1].color;
+				cl1 = p[0].color;
+				cl2 = p[1].color;
 			}
 
 			for(int i = x1; i < x2; i++)
@@ -128,7 +127,41 @@ class TIA1A extends Video
 
 		String describe()
 		{
-			return "";
+			String s;
+			s = "<p><b>Flags: </b>";
+			if(enabled)
+				s += "enabled ";
+			else
+				s += "disabled ";
+			if(reflect)
+				s += "reflected ";
+			if(score)
+				s += "score";
+			s += "</p>";
+			
+			s += "<table border='1'>";
+			int cl1, cl2;
+			if(!score)
+				cl1 = cl2 = color;
+			else
+			{
+				cl1 = p[0].color;
+				cl2 = p[1].color;
+			}
+			s += "<tr><td><b>Left side:</b></td>";
+			for(int i=0; i<20; i++)
+				if(pf[i])
+					s += "<td bgcolor='#" + Integer.toHexString(cl1) + "'>&nbsp;&nbsp;</td>";
+				else
+					s += "<td>&nbsp;&nbsp;</td>";
+			s += "</tr><tr><td><b>Right side:&nbsp;</b></td>";
+			for(int i=0; i<20; i++)
+				if(pf[19-i])
+					s += "<td bgcolor='#" + Integer.toHexString(cl1) + "'>&nbsp;&nbsp;</td>";
+				else
+					s += "<td>&nbsp;&nbsp;</td>";
+			s += "</tr></table>";
+			return s;
 		}
 }
 
@@ -137,16 +170,14 @@ class TIA1A extends Video
 	//
 	class Missile extends Sprite
 	{
-		private int n;
-		protected Missile() {}
-		Missile(int n) { this.n = n; }
-
 		protected int pos;
 		protected boolean[] pixel = new boolean[160];
 		int size;
 		int speed;
 		int copies;
 		int distance;
+		boolean locked;
+		Player player;
 
 		void reset()
 		{
@@ -155,6 +186,7 @@ class TIA1A extends Video
 			distance = 1;
 			pos = 80;
 			speed = 0;
+			locked = false;
 			System.arraycopy(falseArray, 0, pixel, 0, 160);
 		}
 
@@ -162,8 +194,20 @@ class TIA1A extends Video
 		{
 			if(speed == 0)
 				return;
-			pos += speed;
-			pos = adjust(pos);
+			if(locked)
+			{
+				if(player.size == 1)
+					pos = player.pos + 3;
+				else if(player.size == 2)
+					pos = player.pos + 6;
+				else if(player.size == 4)
+					pos = player.pos + 10;
+			}
+			else
+			{
+				pos += speed;
+				pos = adjust(pos);
+			}
 			redraw(); // TODO move the image in the array, instead of
 			          //      redrawing everything
 		}
@@ -181,15 +225,42 @@ class TIA1A extends Video
 		{
 			for(int i = x1; i < x2; i++)
 				if(pixel[i])
-					setPixel(i, y, p[n].color);
+					setPixel(i, y, color);
 		}
 
 		void updateStack() {}
 	
 		String describe()
 		{
-			return "";
+			String s;
+			s = "<table>";
+			s += "<tr><td><b>Enabled</b></td><td>" + (enabled ? "yes" : "no") + "</td></tr>";
+			s += "<tr><td><b>Position locked&nbsp;</b></td><td>" + (locked ? "yes" : "no") + "</td></tr>";
+			s += "<tr><td><b>Horiz. Position&nbsp;</b></td><td>" + pos + "</td></tr>";
+			s += "<tr><td><b>Speed</b></td><td>" + speed + "</td></tr>";
+			s += "</table>";
+			if(enabled)
+			{
+				s += "<table border='1'><tr>";
+				for(int i = 0; i < copies; i++)
+				{
+					for(int j = 0; j < size; j++)
+						s += "<td bgcolor='#" + Integer.toHexString(color) + "'>&nbsp;&nbsp;</td>";
+					if(copies > 1)
+						s += "<td>" + distance + " pixels</td>";
+				}
+				s += "</table>";
+			}
+
+			return s;
 		}
+	}
+
+	//
+	// Ball
+	//
+	private class Ball extends Missile
+	{
 	}
 
 	// 
@@ -204,6 +275,7 @@ class TIA1A extends Video
 		{
 			super.reset();
 			reflect = false;
+			grp = 0x0;
 		}
 
 		void draw(int x1, int x2)
@@ -246,7 +318,50 @@ class TIA1A extends Video
 	
 		String describe()
 		{
-			return "";
+			String s;
+			s = "<table>";
+			s += "<tr><td><b>Enabled</b></td><td>" + (enabled ? "yes" : "no") + "</td></tr>";
+			s += "<tr><td><b>Horiz. Position&nbsp;</b></td><td>" + pos + "</td></tr>";
+			s += "<tr><td><b>Reflected</b></td><td>" + (reflect ? "yes" : "no") + "</td></tr>";
+			s += "<tr><td><b>Speed</b></td><td>" + speed + "</td></tr>";
+			s += "</table>";
+			s += "<table border='1'><tr><td><b>GRP</b></td>";
+			for(int i=0; i<8; i++)
+			{
+				if(((grp >> i) & 1) != 0)
+					s += "<td bgcolor='#" + Integer.toHexString(color) + "'>&nbsp;&nbsp;</td>";
+				else
+					s += "<td>&nbsp;&nbsp;</td>";
+			}
+			s += "</tr>";
+			if(enabled)
+			{
+				s += "</tr><tr><td><b>Actual Graphics</b></td>";
+				for(int cp=0; cp<copies; cp++)
+				{
+					for(int i=0; i<8; i++)
+					{
+						int bt;
+						if(reflect)
+							bt = (grp >> i) & 1;
+						else
+							bt = (grp >> (7-i)) & 1;
+						for(int j=0; j<size; j++)
+						{
+							if(bt != 0)
+								s += "<td bgcolor='#" + Integer.toHexString(color) + "'>&nbsp;&nbsp;</td>";
+							else
+								s += "<td>&nbsp;&nbsp;</td>";
+						}
+					}
+					if(copies > 1)
+						s += "<td>" + distance + " pixels</td>";
+				}
+
+				s += "</tr>";
+			}
+			s += "</table>";
+			return s;
 		}
 	}
 
@@ -264,6 +379,7 @@ class TIA1A extends Video
 	private Playfield playfield = new Playfield();
 	private Missile[] m = new Missile[2];
 	private Player[] p = new Player[2];
+	private Ball ball = new Ball();
 
 	// 
 	// Memory
@@ -279,10 +395,12 @@ class TIA1A extends Video
 	{
 		super(60);
 		width = width();
-		m[0] = new Missile(0);
-		m[1] = new Missile(1);
+		m[0] = new Missile();
+		m[1] = new Missile();
 		p[0] = new Player();
 		p[1] = new Player();
+		m[0].player = p[0];
+		m[1].player = p[1];
 	}
 
 	public void reset()
@@ -296,7 +414,7 @@ class TIA1A extends Video
 		m[1].reset();
 		p[0].reset();
 		p[1].reset();
-		// ball.reset();
+		ball.reset();
 	}
 
 	private final void setPixel(int xx, int yy, int color)
@@ -310,19 +428,33 @@ class TIA1A extends Video
 
 	private void draw(int x1, int x2)
 	{
+		// TODO - check priorities when in SCORE mode
+		// http://nocash.emubase.de/2k6specs.htm#videopriority
 		if(y >= 0 && y < 192)
 		{
 			background.draw(x1, x2);
-			if(playfield.enabled)
-				playfield.draw(x1, x2);
+			if(!playfield.priority)
+			{
+				if(playfield.enabled)
+					playfield.draw(x1, x2);
+				if(ball.enabled)
+					ball.draw(x1, x2);
+			}
 			if(m[1].enabled)
 				m[1].draw(x1, x2);
-			if(m[0].enabled)
-				m[0].draw(x1, x2);
 			if(p[1].enabled)
 				p[1].draw(x1, x2);
+			if(m[0].enabled)
+				m[0].draw(x1, x2);
 			if(p[0].enabled)
 				p[0].draw(x1, x2);
+			if(playfield.priority)
+			{
+				if(playfield.enabled)
+					playfield.draw(x1, x2);
+				if(ball.enabled)
+					ball.draw(x1, x2);
+			}
 		}
 	}
 
@@ -334,6 +466,7 @@ class TIA1A extends Video
 		m[0].updateStack();
 		p[1].updateStack();
 		p[0].updateStack();
+		ball.updateStack();
 	}
 	
 	public void step(int cycles)
@@ -419,28 +552,32 @@ class TIA1A extends Video
 	public void memorySetAfter(int pos, int data, int cycles) 
 	{
 		posAfter = -1; // avoids infinite loop
+		Missile mp;
 
 		switch(pos)
 		{
-			//
-			// Background
-			//
-			case COLUBK:
-				background.color = color[data];
-				break;
-
 			// 
 			// Playfield
 			//
-			case COLUPF:
-				playfield.color = color[data];
-				break;
-
 			case CTRLPF:
-				playfield.reflect = (data & 0x1) > 0 ? true : false;
-				playfield.score = (data & 0x2) > 0 ? true : false;
-				playfield.priority = (data & 0x4) > 0 ? true : false;
-				// ball.size = (data & 0x30) >> 5;
+				{
+					int j = 1;
+					playfield.reflect = (data & 0x1) > 0 ? true : false;
+					playfield.score = (data & 0x2) > 0 ? true : false;
+					playfield.priority = (data & 0x4) > 0 ? true : false;
+					switch((data & 0x30) >> 5)
+					{
+						case 0: j = 1; break;
+						case 1: j = 2; break;
+						case 2: j = 4; break;
+						case 3: j = 8; break;
+					}
+					if(ball.size != j)
+					{
+						ball.size = j;
+						ball.redraw();
+					}
+				}
 				break;
 
 			case PF0: /* Playfield graphics 0 */
@@ -463,68 +600,13 @@ class TIA1A extends Video
 
 
 			//
-			// Player
+			// Shape / Enable
 			//
-			case COLUP0:
-				p[0].color = color[data];
-				break;
-
-			case COLUP1:
-				p[1].color = color[data];
-				break;
-
-			case GRP0:
-				p[0].grp = data;
-				p[0].enabled = (data != 0x0);
-				p[0].redraw();
-				break;
-
-			case GRP1:
-				p[1].grp = data;
-				p[1].enabled = (data != 0x0);
-				p[1].redraw();
-				break;
-
-			case REFP0:
-				p[0].reflect = (data & 0x8) > 0 ? true : false;
-				p[0].redraw();
-				break;
-
-			case REFP1:
-				p[1].reflect = (data & 0x8) > 0 ? true : false;
-				p[1].redraw();
-				break;
-
-			case HMP0:
-			{
-				int hmp0 = data >> 4;
-				if(hmp0 >= 1 && hmp0 <= 7)
-					p[0].speed = -hmp0;
-				else if(hmp0 >= 8 && hmp0 <= 15)
-					p[0].speed = (16 - hmp0);
-				else
-					p[0].speed = 0;
-			}
-			break;
-
-			case HMP1:
-			{
-				int hmp1 = data >> 4;
-				if(hmp1 >= 1 && hmp1 <= 7)
-					p[1].speed = -hmp1;
-				else if(hmp1 >= 8 && hmp1 <= 15)
-					p[1].speed = (16 - hmp1);
-				else
-					p[1].speed = 0;
-			}
-			break;
-
 			case NUSIZ0:
 			case NUSIZ1:
 				{
 					int n = (pos == NUSIZ0 ? 0 : 1);
 
-					// TODO - player
 					int j = 1, i = (data >> 4) & 0x3;
 					switch(i)
 					{
@@ -583,9 +665,111 @@ class TIA1A extends Video
 				}
 				break;
 
+			case GRP0:
+				p[0].grp = data;
+				p[0].enabled = (data != 0x0);
+				p[0].redraw();
+				break;
+
+			case GRP1:
+				p[1].grp = data;
+				p[1].enabled = (data != 0x0);
+				p[1].redraw();
+				break;
+
+			case ENAM0:
+				m[0].enabled = ((data & 0x2) != 0);
+				break;
+
+			case ENAM1:
+				m[1].enabled = ((data & 0x2) != 0);
+				break;
+
+			case ENABL:
+				ball.enabled = ((data & 0x2) != 0);
+				break;
+
+			case REFP0:
+				p[0].reflect = (data & 0x8) > 0 ? true : false;
+				p[0].redraw();
+				break;
+
+			case REFP1:
+				p[1].reflect = (data & 0x8) > 0 ? true : false;
+				p[1].redraw();
+				break;
+
+			case VDELP0:
+				// TODO
+				break;
+
+			case VDELP1:
+				// TODO
+				break;
+
+			case VDELBL:
+				// TODO
+				break;
+
+			// 
+			// Horizontal positioning
 			//
-			// Missile
+			case RESP0:
+			case RESP1:
+			case RESM0:
+			case RESM1:
+			case RESBL:
+				mp = null;
+				if(pos == RESP0) mp = p[0];
+				else if(pos == RESP1) mp = p[1];
+				else if(pos == RESM0) mp = m[0];
+				else if(pos == RESM1) mp = m[1];
+				else if(pos == RESBL) mp = ball;
+				mp.pos = x + cycles + 5;
+				if(mp.pos < 2)
+					mp.pos = 2;
+				else if(mp.pos > 160)
+					mp.pos = 160;
+				mp.redraw();
+				break;
+
+			case RESMP0:
+				m[0].locked = (data & 0x2) != 0;
+				m[0].move();
+				break;
+
+			case RESMP1:
+				m[0].locked = (data & 0x2) != 0;
+				m[1].move();
+				break;
+
+			// 
+			// Horizontal motion
 			//
+			case HMP0:
+			{
+				int hmp0 = data >> 4;
+				if(hmp0 >= 1 && hmp0 <= 7)
+					p[0].speed = -hmp0;
+				else if(hmp0 >= 8 && hmp0 <= 15)
+					p[0].speed = (16 - hmp0);
+				else
+					p[0].speed = 0;
+			}
+			break;
+
+			case HMP1:
+			{
+				int hmp1 = data >> 4;
+				if(hmp1 >= 1 && hmp1 <= 7)
+					p[1].speed = -hmp1;
+				else if(hmp1 >= 8 && hmp1 <= 15)
+					p[1].speed = (16 - hmp1);
+				else
+					p[1].speed = 0;
+			}
+			break;
+
 			case HMM0:
 			{
 				int hmm0 = data >> 4;
@@ -610,11 +794,24 @@ class TIA1A extends Video
 			}
 			break;
 
+			case HMBL:
+			{
+				int hmbl = data >> 4;
+				if(hmbl >= 1 && hmbl <= 7)
+					ball.speed = -hmbl;
+				else if(hmbl >= 8 && hmbl <= 15)
+					ball.speed = (16 - hmbl);
+				else
+					ball.speed = 0;
+			}
+			break;
+
 			case HMOVE:
 				m[0].move();
 				m[1].move();
 				p[0].move();
 				p[1].move();
+				ball.move();
 				break;
 
 			case HMCLR:
@@ -622,14 +819,27 @@ class TIA1A extends Video
 				m[1].speed = 0;
 				p[0].speed = 0;
 				p[1].speed = 0;
+				ball.speed = 0;
 				break;
 
-			case ENAM0:
-				m[0].enabled = ((data & 0x2) != 0);
+			//
+			// Colors
+			//
+
+			case COLUP0:
+				p[0].color = m[0].color = color[data];
 				break;
 
-			case ENAM1:
-				m[1].enabled = ((data & 0x2) != 0);
+			case COLUP1:
+				p[1].color = m[0].color = color[data];
+				break;
+
+			case COLUBK:
+				background.color = color[data];
+				break;
+
+			case COLUPF:
+				playfield.color = ball.color = color[data];
 				break;
 		}
 	}
@@ -644,22 +854,25 @@ class TIA1A extends Video
 
 		// Sprites
 		s += "<h3>Background</h3>";
-		s += "<p>" + background.describe() + "</p>";
+		s += "<p><blockquote>" + background.describe() + "</blockquote></p>";
 
 		s += "<h3>Playfield</h3>";
-		s += "<p>" + playfield.describe() + "</p>";
+		s += "<p><blockquote>" + playfield.describe() + "</blockquote></p>";
 
 		s += "<h3>Player 0</h3>";
-		s += "<p>" + p[0].describe() + "</p>";
-
-		s += "<h3>Player 1</h3>";
-		s += "<p>" + p[1].describe() + "</p>";
+		s += "<p><blockquote>" + p[0].describe() + "</blockquote></p>";
 
 		s += "<h3>Missile 0</h3>";
-		s += "<p>" + m[0].describe() + "</p>";
+		s += "<p><blockquote>" + m[0].describe() + "</blockquote></p>";
+
+		s += "<h3>Player 1</h3>";
+		s += "<p><blockquote>" + p[1].describe() + "</blockquote></p>";
 
 		s += "<h3>Missile 1</h3>";
-		s += "<p>" + m[1].describe() + "</p>";
+		s += "<p><blockquote>" + m[1].describe() + "</blockquote></p>";
+
+		s += "<h3>Ball</h3>";
+		s += "<p><blockquote>" + ball.describe() + "</blockquote></p>";
 
 		JSObject tia_table = (JSObject)JEmu.Window.eval("document.getElementById('video_table');");
 		tia_table.setMember("innerHTML", s);
