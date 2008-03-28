@@ -162,6 +162,8 @@ class TIA1A extends Video
 
 		void move()
 		{
+			if(speed == 0)
+				return;
 			pos += speed;
 			pos = adjust(pos);
 			redraw(); // TODO move the image in the array, instead of
@@ -200,6 +202,7 @@ class TIA1A extends Video
 	private class Player extends Missile
 	{
 		boolean reflect;
+		int grp;
 
 		void reset()
 		{
@@ -207,10 +210,16 @@ class TIA1A extends Video
 			reflect = false;
 		}
 
+		void redraw()
+		{
+		}
+
 		void draw(int x1, int x2)
 		{
 		}
 
+		void updateStack() {}
+	
 		String describe()
 		{
 			return "";
@@ -434,53 +443,51 @@ class TIA1A extends Video
 				p[1].color = color[data];
 				break;
 
-			case NUSIZ0:
-				{
-					// TODO - player
-					int j = 1, i = (data >> 4) & 0x3;
-					switch(i)
-					{
-						case 0: j = 1; break;
-						case 1: j = 2; break;
-						case 2: j = 4; break;
-						case 3: j = 8; break;
-					}
-					m[0].size = j;
-					
-					i = (data & 0x7);
-					switch(i)
-					{
-						case 0: case 5: case 7:
-							m[0].copies = 1;
-							m[0].distance = 0;
-							break;
-						case 1:
-							m[0].copies = 2;
-							m[0].distance = 16;
-							break;
-						case 2:
-							m[0].copies = 2;
-							m[0].distance = 32;
-							break;
-						case 3:
-							m[0].copies = 3;
-							m[0].distance = 16;
-							break;
-						case 4:
-							m[0].copies = 2;
-							m[0].distance = 32;
-							break;
-						case 6:
-							m[0].copies = 3;
-							m[0].distance = 32;
-							break;
-					}
-					m[0].redraw();
-				}
+			case GRP0:
+				p[0].grp = data;
 				break;
 
+			case GRP1:
+				p[1].grp = data;
+				break;
+
+			case REFP0:
+				p[0].reflect = (data & 0x8) > 0 ? true : false;
+				break;
+
+			case REFP1:
+				p[1].reflect = (data & 0x8) > 0 ? true : false;
+				break;
+
+			case HMP0:
+			{
+				int hmp0 = data >> 4;
+				if(hmp0 >= 1 && hmp0 <= 7)
+					p[0].speed = -hmp0;
+				else if(hmp0 >= 8 && hmp0 <= 15)
+					p[0].speed = (16 - hmp0);
+				else
+					p[0].speed = 0;
+			}
+			break;
+
+			case HMP1:
+			{
+				int hmp1 = data >> 4;
+				if(hmp1 >= 1 && hmp1 <= 7)
+					p[1].speed = -hmp1;
+				else if(hmp1 >= 8 && hmp1 <= 15)
+					p[1].speed = (16 - hmp1);
+				else
+					p[1].speed = 0;
+			}
+			break;
+
+			case NUSIZ0:
 			case NUSIZ1:
 				{
+					int n = (pos == NUSIZ0 ? 0 : 1);
+
 					// TODO - player
 					int j = 1, i = (data >> 4) & 0x3;
 					switch(i)
@@ -490,7 +497,53 @@ class TIA1A extends Video
 						case 2: j = 4; break;
 						case 3: j = 8; break;
 					}
-					m[1].size = j;
+					m[n].size = j;
+					
+					switch(data & 0x7)
+					{
+						case 0: 
+							p[n].size = 1;
+							p[n].copies = m[n].copies = 1;
+							p[n].distance = m[n].distance = 0;
+							break;
+						case 1:
+							p[n].size = 1;
+							p[n].copies = m[n].copies = 2;
+							p[n].distance = m[n].distance = 16;
+							break;
+						case 2:
+							p[n].size = 1;
+							p[n].copies = m[n].copies = 2;
+							p[n].distance = m[n].distance = 32;
+							break;
+						case 3:
+							p[n].size = 1;
+							p[n].copies = m[n].copies = 3;
+							p[n].distance = m[n].distance = 16;
+							break;
+						case 4:
+							p[n].size = 1;
+							p[n].copies = m[n].copies = 2;
+							p[n].distance = m[n].distance = 32;
+							break;
+						case 5:
+							p[n].size = 2;
+							p[n].copies = m[n].copies = 1;
+							p[n].distance = m[n].distance = 0;
+							break;
+						case 6:
+							p[n].size = 1;
+							p[n].copies = m[n].copies = 3;
+							p[n].distance = m[n].distance = 32;
+							break;
+						case 7:
+							p[n].size = 4;
+							p[n].copies = m[n].copies = 1;
+							p[n].distance = m[n].distance = 0;
+							break;
+					}
+					m[n].redraw();
+					p[n].redraw();
 				}
 				break;
 
@@ -523,6 +576,16 @@ class TIA1A extends Video
 
 			case HMOVE:
 				m[0].move();
+				m[1].move();
+				p[0].move();
+				p[1].move();
+				break;
+
+			case HMCLR:
+				m[0].speed = 0;
+				m[1].speed = 0;
+				p[0].speed = 0;
+				p[1].speed = 0;
 				break;
 
 			case ENAM0:

@@ -10,7 +10,7 @@ import java.io.*;
 
 abstract class JEmu 
 	extends JApplet 
-	implements Runnable, KeyListener, FocusListener //, MouseListener
+	implements Runnable, KeyListener, FocusListener, MouseListener
 {
 	/*
 	 * Fields
@@ -19,7 +19,6 @@ abstract class JEmu
 	public Video video; // emulator Video card
 	public List<Device> devices = new ArrayList<Device>(); // emulator other devices
 
-	protected MemoryMaps memoryMaps = new MemoryMaps();
 	public static int ram[]; // RAM memory
 
 	public static JSObject Window = null; // HTML window (javascript object)
@@ -58,7 +57,8 @@ abstract class JEmu
 	{
 		addKeyListener(this);
 		addFocusListener(this);
-		// addMouseListener(this);
+		addMouseListener(this);
+		setFocusable(true);
 	}
 
 	public void start()
@@ -144,6 +144,12 @@ abstract class JEmu
 			repaint();
 		}
 	}
+
+	public void mouseClicked(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
 
 	//
 	// thread methods
