@@ -3,8 +3,6 @@ import java.util.Stack;
 
 class TIA1A extends Video
 {
-	private final boolean[] falseArray = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-
 	//
 	// Helper functions
 	//
@@ -144,7 +142,7 @@ class TIA1A extends Video
 		Missile(int n) { this.n = n; }
 
 		protected int pos;
-		private boolean[] pixel = new boolean[160];
+		protected boolean[] pixel = new boolean[160];
 		int size;
 		int speed;
 		int copies;
@@ -172,8 +170,6 @@ class TIA1A extends Video
 
 		void redraw()
 		{
-			boolean any = false;
-
 			System.arraycopy(falseArray, 0, pixel, 0, 160);
 
 			for(int i = 0; i < copies; i++)
@@ -210,12 +206,40 @@ class TIA1A extends Video
 			reflect = false;
 		}
 
-		void redraw()
-		{
-		}
-
 		void draw(int x1, int x2)
 		{
+			for(int i = x1; i < x2; i++)
+				if(pixel[i])
+					setPixel(i, y, color);
+		}
+
+		void redraw()
+		{
+			System.arraycopy(falseArray, 0, pixel, 0, 160);
+
+			if(!enabled)
+				return;
+			
+			int ps = pos;
+
+			for(int cp=0; cp<copies; cp++)
+			{
+				for(int i=0; i<8; i++)
+				{
+					int bt;
+					if(reflect)
+						bt = (grp >> i) & 1;
+					else
+						bt = (grp >> (7-i)) & 1;
+					for(int j=0; j<size; j++)
+					{
+						if(bt != 0)
+							pixel[adjust(ps)] = true;
+						ps++;
+					}
+				}
+				ps += distance;
+			}
 		}
 
 		void updateStack() {}
@@ -295,6 +319,10 @@ class TIA1A extends Video
 				m[1].draw(x1, x2);
 			if(m[0].enabled)
 				m[0].draw(x1, x2);
+			if(p[1].enabled)
+				p[1].draw(x1, x2);
+			if(p[0].enabled)
+				p[0].draw(x1, x2);
 		}
 	}
 
@@ -304,6 +332,8 @@ class TIA1A extends Video
 		playfield.updateStack();
 		m[1].updateStack();
 		m[0].updateStack();
+		p[1].updateStack();
+		p[0].updateStack();
 	}
 	
 	public void step(int cycles)
@@ -445,18 +475,24 @@ class TIA1A extends Video
 
 			case GRP0:
 				p[0].grp = data;
+				p[0].enabled = (data != 0x0);
+				p[0].redraw();
 				break;
 
 			case GRP1:
 				p[1].grp = data;
+				p[1].enabled = (data != 0x0);
+				p[1].redraw();
 				break;
 
 			case REFP0:
 				p[0].reflect = (data & 0x8) > 0 ? true : false;
+				p[0].redraw();
 				break;
 
 			case REFP1:
 				p[1].reflect = (data & 0x8) > 0 ? true : false;
+				p[1].redraw();
 				break;
 
 			case HMP0:
@@ -730,6 +766,24 @@ class TIA1A extends Video
 	  0xe19344, 0xeda04e, 0xf9ad58, 0xfcb75c, 
 	  0xffc160, 0xffc671, 0xffcb83, 0xffcb83, 
 	};
+
+	private final boolean[] falseArray = { false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false, false, false, false, false, false, false, 
+		false, false, false, false };
 
 	//
 	// Registers (writing)

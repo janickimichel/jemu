@@ -287,6 +287,9 @@ class MOS6502 extends CPU
 		if(add == IP)
 			IP += is;
 
+		if(opcode == 0x4d || opcode == 0x60)
+			IP += 3; // TODO ???
+
 		return cycles;
 	}
 
