@@ -198,13 +198,13 @@ class MOS6502 extends CPU
 			// PHA (push A on stack)
 			case 0x48: cycles = 3; PHA(cycles); is = 1; break;
 
-			// PHA (push SP on stack)
+			// PHP (push SP on stack)
 			case 0x08: cycles = 3; PHP(cycles); is = 1; break;
 
 			// PLA (push A from stack)
 			case 0x68: cycles = 4; PLA(); is = 1; break;
 
-			// PLA (push A from stack)
+			// PLP 
 			case 0x28: cycles = 4; PLP(); is = 1; break;
 
 			// ROL (rotate one bit left)
@@ -244,7 +244,7 @@ class MOS6502 extends CPU
 			case 0xF8: cycles = 2; SED(); is = 1; break;
 
 		    // SEI (set interrupt disable status)
-			case 0x78: cycles = 2; SEC(); is = 1; break;
+			case 0x78: cycles = 2; SEI(); is = 1; break;
 
 		    // STA (store A in memory)
 			case 0x85: cycles = 3; STA(zpa(IP), cycles); is = 2; break;

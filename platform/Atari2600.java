@@ -34,11 +34,21 @@ public class Atari2600 extends JEmu
 	{
 		int pos = 0xf000;
 
+		if(d.size() != 4096 && d.size() != 2048)
+			System.out.println("Invalid size!");
+
 		for(Integer s: d)
 		{
 			setRAM(pos, s, 0);
 			pos++;
 		}
+		
+		if(d.size() == 2048)
+			for(Integer s: d)
+			{
+				setRAM(pos, s, 0);
+				pos++;
+			}
 
 		reset();
 	}
