@@ -72,8 +72,12 @@ public class Atari2600 extends JEmu
 	void setRAM(int pos, int d, int cycles)
 	{
 		// memory maps & mirrors
-		if(pos <= 0x2c)
+		if(pos <= 0x80)
 		{
+			if(pos >= 0x40) // TIA fist mirror
+				pos -= 0x40;
+			// TODO - check for other mirrors
+			// http://www.qotile.net/minidig/docs/2600_mem_map.txt
 			if(!video.memorySet(pos, d, cycles))
 				return;
 		}
