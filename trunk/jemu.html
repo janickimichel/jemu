@@ -139,35 +139,43 @@ function use_debugger()
 <a onclick="document.getElementById('JEmu').loadROM('rom/atari2600/freeway.bin');">Freeway</a>&nbsp;
 
 <!-- CPU Debugger -->
+<table border='1'><tr>
+<td valign='top'>
 <div id="cpu" style="display: none;">
-	<hr>
 	<p>Initial position: $<input id="cpu_pos" type="text" size=4 maxlength=4 value="0000" onchange="document.getElementById('JEmu').rebuildDebugger(-1)"></p>
 	<div id="cpu_table"></div>
 </div>
+</td>
 
 <!-- Video debugger -->
+<td valign='top'>
 <div id="video" style="display: none;">
-	<hr>
 	<div id="video_table"></div>
 </div>
+</td></tr>
 
 <!-- Device Debuggers -->
 <div id="dev0" style="display: none;">
-	<hr>
+<td valign='top'>
 	<div id="dev_table_0"></div>
 </div>
+</td>
+<td valign='top'>
 <div id="dev1" style="display: none;">
-	<hr>
 	<div id="dev_table_1"></div>
 </div>
+</td>
+<td valign='top'>
 <div id="dev2" style="display: none;">
-	<hr>
 	<div id="dev_table_2"></div>
 </div>
+</td>
+<td valign='top'>
 <div id="dev3" style="display: none;">
-	<hr>
 	<div id="dev_table_3"></div>
 </div>
+</td>
+</tr></table>
 
 <!-- Memory Debugger -->
 <div id="memory" style="display: none;">

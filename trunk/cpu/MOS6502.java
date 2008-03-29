@@ -1813,6 +1813,7 @@ class MOS6502 extends CPU
 			case 0: return "A";
 			case 1: return "X";
 			case 2: return "Y";
+			case 3: return "SP";
 		}
 		return "";
 	}
@@ -1824,6 +1825,7 @@ class MOS6502 extends CPU
 			case 0: return A;
 			case 1: return X;
 			case 2: return Y;
+			case 3: return SP;
 		}
 		return 0;	
 	}
