@@ -364,7 +364,7 @@ class MOS6502 extends CPU
 
 	private int getSrc(int address)
 	{
-		return JEmu.platform.getRAM(address);
+		return JEmu.platform.getRAM(address) & 0xff;
 	}
 
 
@@ -537,24 +537,27 @@ class MOS6502 extends CPU
 
 	private void CMP(int src)
 	{
+		C = (A >= src);
 		src = A - src;
-		C = (src < 0x100);
+		// C = (src < 0x100);
 		S = ((src & 0x80) > 0);
 		Z = ((src &= 0xff) == 0);
 	}
 
 	private void CPX(int src)
 	{
+		C = (X >= src);
 		src = X - src;
-		C = (src < 0x100);
+		// C = (src < 0x100);
 		S = ((src & 0x80) > 0);
 		Z = ((src &= 0xff) == 0);
 	}
 
 	private void CPY(int src)
 	{
+		C = (Y >= src);
 		src = Y - src;
-		C = (src < 0x100);
+		// C = (src < 0x100);
 		S = ((src & 0x80) > 0);
 		Z = ((src &= 0xff) == 0);
 	}
