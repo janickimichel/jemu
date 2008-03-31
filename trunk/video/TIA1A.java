@@ -368,7 +368,7 @@ class TIA1A extends Video
 	//
 	// Electron
 	//
-	private int x, y;
+	private int x;
 	private int width;
 	private boolean lastWasSync = false;
 
@@ -495,7 +495,7 @@ class TIA1A extends Video
 				updateStack();
 				screenDone = true;
 			}
-			else if(y == 40)
+			else if(y == 0)
 				screenBegin = true;
 			else if(y == 260)
 				y = 0;
@@ -535,7 +535,7 @@ class TIA1A extends Video
 					updateStack();
 					screenDone = true;
 				}
-				else if(y == 40)
+				else if(y == 0)
 					screenBegin = true;
 				else if(y == 260)
 					y = 0;

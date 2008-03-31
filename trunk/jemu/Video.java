@@ -5,6 +5,8 @@ import java.util.Stack;
 
 abstract class Video extends Device
 {
+	public int y; // electron vertical position
+
 	public boolean scanlineDone = false;
 	public boolean screenDone = false;
 	public boolean screenBegin = false;
@@ -16,6 +18,8 @@ abstract class Video extends Device
 	public BufferedImage image;
 
 	protected int[] pixels;
+
+	private int[] clearArray;
 
 	public Video(int fps)
 	{
@@ -34,14 +38,16 @@ abstract class Video extends Device
 		for(int i=0; i<(w*h); i++)
 			pixels[i] = 0xff000000;
 
+		clearArray = new int[w*h];
+		for(int i=0; i<(w*h); i++)
+			clearArray[i] = 0xffffffff;
+
 		JEmu.platform.repaint();
 	}
 
 	public void clearScreen()
 	{
-		for(int i=0; i<(width()*height()); i++)
-			pixels[i] = 0xff000000;
-		JEmu.platform.repaint();
+		System.arraycopy(clearArray, 0, pixels, 0, width()*height());
 	}
 
 	public void drawScreen()
