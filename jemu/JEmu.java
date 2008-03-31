@@ -35,6 +35,9 @@ abstract class JEmu
 
 	private Timer updatingTimer = new Timer();
 
+	private boolean stopOnNextFrame = false, stopOnNextScanline = false;
+	private boolean clearingScreen = false;
+
 	// define if the user is debugging or just playing
 	private boolean debugging = false;
 	public void setDebugging(boolean d) 
@@ -97,6 +100,9 @@ abstract class JEmu
 
 	public void paint(Graphics g) 
 	{
+		if(clearingScreen)
+			return;
+
 		g.drawImage(video.image, 0, 0, this);
 		if(!focused)
 		{
@@ -158,25 +164,55 @@ abstract class JEmu
 	{
 		timer = (System.currentTimeMillis() + (1000 / video.fps));
 
-		if(debugging)
+		if(debugging) // user clicked RUN on the debugger
 		{
+			int last_y = video.y;
+
 			while(JEmu.running)
 			{
 				step();
 					
 				// check for breakpoints
-				if(cpu.breakPoints.contains(cpu.IP))
+				if(!stopOnNextScanline && !stopOnNextFrame)
+					if(cpu.breakPoints.contains(cpu.IP))
+					{
+						running = false;
+						video.drawScreen();
+					}
+
+				// if screen began, we make it white (to step thru pixel writes)
+				if(video.screenBegin)
 				{
-					running = false;
-					video.drawScreen();
+					clearingScreen = true;
+					video.clearScreen();
+					clearingScreen = false;
+					video.screenBegin = false;
 				}
-				
+
+				// check if we need to stop on the next scanline
+				if(stopOnNextScanline)
+					if(last_y != video.y)
+					{
+						running = false;
+						repaint();
+						stopOnNextScanline = false;
+					}
+
 				// check if needs to update screen
 				if(video.screenDone)
+				{
 					updateScreen();
+					// check if the user clicked on RUN UNTIL NEXT FRAME
+					if(stopOnNextFrame)
+					{
+						running = false;
+						repaint();
+						stopOnNextFrame = false;
+					}
+				}
 			}
 		}
-		else // no breakpoints 
+		else // no breakpoints, just the user running at full speed
 		{
 			while(JEmu.running)
 			{
@@ -187,9 +223,10 @@ abstract class JEmu
 				{
 					updateScreen();
 
-					while(!focused) // check if the applet has focus
+					// check if the applet has focus
+					while(!focused) 
 						try {
-							Thread.sleep(100);
+							Thread.sleep(300);
 						} catch(InterruptedException e) {}
 				}
 			}
@@ -260,6 +297,7 @@ abstract class JEmu
 	private void threadSuspend()
 	{
 		JEmu.running = false;
+		repaint();
 	}
 
 
@@ -342,18 +380,34 @@ abstract class JEmu
 
 	public void runButton()
 	{
+		stopOnNextScanline = stopOnNextFrame = false;
 		if(JEmu.running)
+		{
 			threadSuspend();
+			repaint();
+		}
 		else
 			threadStart();
 	}
 
 	public void nextScanlineButton()
 	{
+		stopOnNextFrame = false;
+		stopOnNextScanline = true;
+		if(JEmu.running)
+			threadSuspend();
+		else
+			threadStart();
 	}
 
 	public void nextFrameButton()
 	{
+		stopOnNextFrame = true;
+		stopOnNextScanline = false;
+		if(JEmu.running)
+			threadSuspend();
+		else
+			threadStart();
 	}
 
 	public void addBreakpoint(int pos)
