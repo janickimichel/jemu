@@ -515,6 +515,7 @@ class TIA1A extends Video
 			 * TV Set
 			 */
 			case VSYNC:
+				/*
 				if((data & 0x2) > 0)
 				{
 					//updateStack();
@@ -523,6 +524,7 @@ class TIA1A extends Video
 					//screenDone = true;
 					lastWasSync = true;
 				}
+				*/
 				break;
 
 			case WSYNC:
