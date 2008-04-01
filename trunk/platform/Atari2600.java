@@ -72,6 +72,9 @@ public class Atari2600 extends JEmu
 	void setRAM(int pos, int d, int cycles)
 	{
 		// memory maps & mirrors
+//		if(pos >= 0x100 && pos < 0x200)
+//			pos -= 0x100;
+		
 		if(pos <= 0x80)
 		{
 			if(pos >= 0x40) // TIA fist mirror
