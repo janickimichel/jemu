@@ -198,13 +198,13 @@ class MOS6502 extends CPU
 			// PHA (push A on stack)
 			case 0x48: cycles = 3; PHA(cycles); is = 1; break;
 
-			// PHP (push SP on stack)
+			// PHP (push Processor Status on stack)
 			case 0x08: cycles = 3; PHP(cycles); is = 1; break;
 
 			// PLA (push A from stack)
 			case 0x68: cycles = 4; PLA(); is = 1; break;
 
-			// PLP 
+			// PLP (pull processor status from stack)
 			case 0x28: cycles = 4; PLP(); is = 1; break;
 
 			// ROL (rotate one bit left)
@@ -587,6 +587,7 @@ class MOS6502 extends CPU
 	private void EOR(int src)
 	{
 		src ^= A;
+		src &= 0xff;
 		S = ((src & 0x80) > 0);
 		Z = (src == 0);
 		A = src;
@@ -653,7 +654,7 @@ class MOS6502 extends CPU
 	{
 		C = ((src & 0x01) > 0);
 		src >>= 1;
-		S = ((src & 0x80) > 0);
+		S = false; // ((src & 0x80) > 0);
 		Z = (src == 0);
 		if(opcode == 0x4A)
 			A = src;
@@ -678,7 +679,16 @@ class MOS6502 extends CPU
 
 	private void PHP(int cycles)
 	{
-		PUSH(SP, cycles);
+		int PS = 0x0;
+		PS |= (C ? 0x01 : 0x0);
+		PS |= (Z ? 0x02 : 0x0);
+		PS |= (I ? 0x04 : 0x0);
+		PS |= (D ? 0x08 : 0x0);
+		PS |= (B ? 0x10 : 0x0);
+		PS |= 0x20;
+		PS |= (O ? 0x40 : 0x0);
+		PS |= (S ? 0x80 : 0x0);
+		PUSH(PS, cycles);
 	}
 
 	private void PLA()
@@ -691,8 +701,14 @@ class MOS6502 extends CPU
 
 	private void PLP()
 	{
-		int src = PULL();
-		SP = src;
+		int PS = PULL();
+		C = ((PS & 0x01) != 0);
+		Z = ((PS & 0x02) != 0);
+		I = ((PS & 0x04) != 0);
+		D = ((PS & 0x08) != 0);
+		B = ((PS & 0x10) != 0);
+		O = ((PS & 0x40) != 0);
+		S = ((PS & 0x80) != 0);
 	}
 
 	private void ROL(int address, int src, int cycles, int opcode)
@@ -719,9 +735,9 @@ class MOS6502 extends CPU
 		S = ((src & 0x80) > 0);
 		Z = (src == 0);
 		if(opcode == 0x6A)
-			A = src;
+			A = src & 0xff;
 		else
-			JEmu.platform.setRAM(address, src, cycles);
+			JEmu.platform.setRAM(address, src & 0xff, cycles);
 	}
 
 	private void RTI()
@@ -743,6 +759,7 @@ class MOS6502 extends CPU
 	private	void SBC(int src)
 	{
 		int temp = A - src - (C ? 0 : 1);
+		// int temp = A + (C ? 0 : 1) - 1 - src;
 		S = ((temp & 0x80) > 0);
 		Z = ((temp & 0xFF) == 0);
 		O = ((((A^temp)&0x80)&((A^src)&0x80)) > 0);
@@ -841,12 +858,15 @@ class MOS6502 extends CPU
 	 */
 	private void PUSH(int b, int cycles) 
 	{ 
-		JEmu.platform.setRAM(SP+0x100, b ,cycles);
+		JEmu.platform.setRAMDirect(SP+0x100, b ,cycles);
 		SP--;
+		SP &= 0xff;
 	}
 	private int PULL()
 	{
-		return JEmu.platform.getRAM((++SP)+0x100);
+		SP = (SP + 1) & 0xff;
+		return JEmu.platform.getRAM((SP)+0x100);
+		// return JEmu.platform.getRAM((++SP)+0x100);
 	}
 
 
