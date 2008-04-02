@@ -497,7 +497,7 @@ class TIA1A extends Video
 			}
 			else if(y == 0)
 				screenBegin = true;
-			else if(y == 260)
+			else if(y == 262)
 				y = 0;
 		}
 
@@ -515,7 +515,7 @@ class TIA1A extends Video
 			 * TV Set
 			 */
 			case VSYNC:
-				/*
+				// /*
 				if((data & 0x2) > 0)
 				{
 					//updateStack();
@@ -524,7 +524,7 @@ class TIA1A extends Video
 					//screenDone = true;
 					lastWasSync = true;
 				}
-				*/
+				// */
 				break;
 
 			case WSYNC:
@@ -539,7 +539,7 @@ class TIA1A extends Video
 				}
 				else if(y == 0)
 					screenBegin = true;
-				else if(y == 260)
+				else if(y == 262)
 					y = 0;
 				lastWasSync = true;
 				break;
@@ -749,63 +749,63 @@ class TIA1A extends Video
 			// Horizontal motion
 			//
 			case HMP0:
-			{
-				int hmp0 = data >> 4;
-				if(hmp0 >= 1 && hmp0 <= 7)
-					p[0].speed = -hmp0;
-				else if(hmp0 >= 8 && hmp0 <= 15)
-					p[0].speed = (16 - hmp0);
-				else
-					p[0].speed = 0;
-			}
-			break;
+				{
+					int hmp0 = data >> 4;
+					if(hmp0 >= 1 && hmp0 <= 7)
+						p[0].speed = -hmp0;
+					else if(hmp0 >= 8 && hmp0 <= 15)
+						p[0].speed = (16 - hmp0);
+					else
+						p[0].speed = 0;
+				}
+				break;
 
 			case HMP1:
-			{
-				int hmp1 = data >> 4;
-				if(hmp1 >= 1 && hmp1 <= 7)
-					p[1].speed = -hmp1;
-				else if(hmp1 >= 8 && hmp1 <= 15)
-					p[1].speed = (16 - hmp1);
-				else
-					p[1].speed = 0;
-			}
+				{
+					int hmp1 = data >> 4;
+					if(hmp1 >= 1 && hmp1 <= 7)
+						p[1].speed = -hmp1;
+					else if(hmp1 >= 8 && hmp1 <= 15)
+						p[1].speed = (16 - hmp1);
+					else
+						p[1].speed = 0;
+				}
 			break;
 
 			case HMM0:
-			{
-				int hmm0 = data >> 4;
-				if(hmm0 >= 1 && hmm0 <= 7)
-					m[0].speed = -hmm0;
-				else if(hmm0 >= 8 && hmm0 <= 15)
-					m[0].speed = (16 - hmm0);
-				else
-					m[0].speed = 0;
-			}
+				{
+					int hmm0 = data >> 4;
+					if(hmm0 >= 1 && hmm0 <= 7)
+						m[0].speed = -hmm0;
+					else if(hmm0 >= 8 && hmm0 <= 15)
+						m[0].speed = (16 - hmm0);
+					else
+						m[0].speed = 0;
+				}
 			break;
 
 			case HMM1:
-			{
-				int hmm1 = data >> 4;
-				if(hmm1 >= 1 && hmm1 <= 7)
-					m[1].speed = -hmm1;
-				else if(hmm1 >= 8 && hmm1 <= 15)
-					m[1].speed = (16 - hmm1);
-				else
-					m[1].speed = 0;
-			}
+				{
+					int hmm1 = data >> 4;
+					if(hmm1 >= 1 && hmm1 <= 7)
+						m[1].speed = -hmm1;
+					else if(hmm1 >= 8 && hmm1 <= 15)
+						m[1].speed = (16 - hmm1);
+					else
+						m[1].speed = 0;
+				}
 			break;
 
 			case HMBL:
-			{
-				int hmbl = data >> 4;
-				if(hmbl >= 1 && hmbl <= 7)
-					ball.speed = -hmbl;
-				else if(hmbl >= 8 && hmbl <= 15)
-					ball.speed = (16 - hmbl);
-				else
-					ball.speed = 0;
-			}
+				{
+					int hmbl = data >> 4;
+					if(hmbl >= 1 && hmbl <= 7)
+						ball.speed = -hmbl;
+					else if(hmbl >= 8 && hmbl <= 15)
+						ball.speed = (16 - hmbl);
+					else
+						ball.speed = 0;
+				}
 			break;
 
 			case HMOVE:

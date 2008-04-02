@@ -72,10 +72,10 @@ public class Atari2600 extends JEmu
 	void setRAM(int pos, int d, int cycles)
 	{
 		// memory maps & mirrors
-//		if(pos >= 0x100 && pos < 0x200)
-//			pos -= 0x100;
+		if(pos >= 0x100 && pos < 0x200)
+			pos -= 0x100;
 		
-		if(pos <= 0x80)
+		if(pos < 0x80)
 		{
 			if(pos >= 0x40) // TIA fist mirror
 				pos -= 0x40;
@@ -95,12 +95,13 @@ public class Atari2600 extends JEmu
 	void setRAMDirect(int pos, int d)
 	{
 		JEmu.ram[pos] = d & 0xff;
+		// System.out.println("RAM position " + pos + " = " + (d & 0xff));
 	}
 
 	int getRAM(int pos)
 	{
-		if(pos >= 0x30 && pos <= 0x3f)
-			return JEmu.ram[pos & 0xf];
+		if(pos >= 0x30 && pos <= 0x3d)
+			return JEmu.ram[pos - 0x30];
 		if(pos >= 0x294 && pos <= 0x297)
 			return JEmu.ram[pos - 0x10];
 		return JEmu.ram[pos];
@@ -128,6 +129,15 @@ public class Atari2600 extends JEmu
 			case KeyEvent.VK_SPACE:
 				setRAMDirect(pia6532.INPT4, getRAM(pia6532.INPT4) ^ 0x80);
 				break;
+			case KeyEvent.VK_R:
+				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) ^ 0x01);
+				break;
+			case KeyEvent.VK_S:
+				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) ^ 0x02);
+				break;
+			case KeyEvent.VK_C:
+				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) ^ 0x08);
+				break;
 		}
 	}
 
@@ -149,6 +159,15 @@ public class Atari2600 extends JEmu
 				break;
 			case KeyEvent.VK_SPACE:
 				setRAMDirect(pia6532.INPT4, getRAM(pia6532.INPT4) | 0x80);
+				break;
+			case KeyEvent.VK_R:
+				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) | 0x01);
+				break;
+			case KeyEvent.VK_S:
+				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) | 0x02);
+				break;
+			case KeyEvent.VK_C:
+				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) | 0x08);
 				break;
 		}
 	}

@@ -31,7 +31,7 @@ class PIA6532 extends Device
 		/* Set SWCHA to 0xff, since each bit holds the value of 1 when
 		 * the joystick isn't being pressed to any direction */
 		JEmu.platform.setRAMDirect(SWCHA, 0xff);
-		JEmu.platform.setRAMDirect(SWCHB, 0xff);
+		JEmu.platform.setRAMDirect(SWCHB, 0x0b);
 		JEmu.platform.setRAMDirect(INPT4, 0x80);
 		JEmu.platform.setRAMDirect(INPT5, 0x80);
 	}

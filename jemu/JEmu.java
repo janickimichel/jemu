@@ -89,7 +89,7 @@ abstract class JEmu
 		catch(netscape.javascript.JSException e)
 		{
 			// using appletviewer
-			loadROM("rom/atari2600/tennis.bin");
+			loadROM("rom/atari2600/fishdrby.bin");
 		}
 	}
 
@@ -365,7 +365,32 @@ abstract class JEmu
 
 	private void rebuildMemoryDebugger(int pos)
 	{
-		// TODO
+		JSObject table = (JSObject)JEmu.Window.eval("document.getElementById('memory_table');");
+		String s = "<table border='1'><th>Address</th>";
+		
+		// headers
+		for(int i=0; i<16; i++)
+			s += "<th>_" + Integer.toHexString(i).toUpperCase() + "</td>";
+
+		// lines
+		int bt = pos / 16;
+		bt *= 16;
+		for(int i=0; i<16; i++)
+		{
+			s += "<tr><td style='text-align: right;'><b>$" + Integer.toHexString(bt / 0x10).toUpperCase() + "_</td>";
+			for(int j=0; j<16; j++)
+			{
+				s += "<td class='memory' id='d" + Integer.toString(bt) + "'>";
+				s += Integer.toHexString(getRAM(bt)).toUpperCase() + "</td>";
+				bt++;
+			}
+			s += "</tr>";
+		}
+
+		table.setMember("innerHTML", s + "</table>");
+
+		JSObject memory_pos = (JSObject)JEmu.Window.eval("document.getElementById('memory_pos');");
+		memory_pos.setMember("value", Integer.toHexString(pos).toUpperCase());
 	}
 
 	/*
