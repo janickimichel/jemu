@@ -89,7 +89,7 @@ abstract class JEmu
 		catch(netscape.javascript.JSException e)
 		{
 			// using appletviewer
-			loadROM("rom/atari2600/fishdrby.bin");
+			loadROM("rom/atari2600/Fishdrby.bin");
 		}
 	}
 
