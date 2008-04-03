@@ -858,7 +858,7 @@ class MOS6502 extends CPU
 	 */
 	private void PUSH(int b, int cycles) 
 	{ 
-		JEmu.platform.setRAMDirect(SP+0x100, b ,cycles);
+		JEmu.platform.setRAMDirect(SP+0x100, b);
 		SP--;
 		SP &= 0xff;
 	}
