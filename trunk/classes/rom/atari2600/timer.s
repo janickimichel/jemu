@@ -6,7 +6,7 @@
 
 Start
 	lda #15
-	sta TIM64T
+	sta TIM1T
 
 Here
 	lda INTIM

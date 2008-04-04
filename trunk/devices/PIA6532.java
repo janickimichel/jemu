@@ -20,6 +20,7 @@ class PIA6532 extends Device
 	final int T1024T = 0x297;
 
 	int interval = 0, time = 0;
+	boolean underflow = false;
 
 	public String name() { return "PIA 6532"; }
 
@@ -27,6 +28,7 @@ class PIA6532 extends Device
 	{
 		interval = 0;
 		time = 0;
+		underflow = false;
 
 		/* Set SWCHA to 0xff, since each bit holds the value of 1 when
 		 * the joystick isn't being pressed to any direction */
@@ -39,6 +41,16 @@ class PIA6532 extends Device
 	public void step(int cycles)
 	{
 		time -= cycles;
+
+		// check for underflow
+		/*
+		if(!underflow && time < 0)
+		{
+			time = -cycles;
+			underflow = true;
+		}
+		*/
+
 		JEmu.platform.setRAMDirect(INTIM, (time >> interval));
 	}
 
@@ -49,21 +61,25 @@ class PIA6532 extends Device
 			case TIM1T:
 				interval = 0;
 				time = data << interval;
+				underflow = true;
 				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 			case TIM8T:
 				interval = 3;
 				time = data << interval;
+				underflow = true;
 				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 			case TIM64T:
 				interval = 6;
 				time = data << interval;
+				underflow = true;
 				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 			case T1024T:
 				interval = 10;
 				time = data << interval;
+				underflow = true;
 				JEmu.platform.setRAMDirect(INTIM, data);
 				return false;
 		}
