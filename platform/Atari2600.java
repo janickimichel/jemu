@@ -17,6 +17,8 @@ public class Atari2600 extends JEmu
 
 	public void step()
 	{
+		printNextStep();
+
 		cpu.timer.start();
 		int cycles = cpu.step();
 		cpu.timer.stop();
@@ -170,5 +172,16 @@ public class Atari2600 extends JEmu
 				setRAMDirect(pia6532.SWCHB, getRAM(pia6532.SWCHB) | 0x08);
 				break;
 		}
+	}
+
+	private void printNextStep()
+	{
+		System.out.println((video.y + 40) + " " + 
+				((TIA1A)video).x + " " +
+				((MOS6502)cpu).A + " " + 
+				((MOS6502)cpu).X + " " + 
+				((MOS6502)cpu).Y + " " + 
+				((MOS6502)cpu).SP + " " + 
+				Integer.toHexString(cpu.IP));
 	}
 }

@@ -1,13 +1,10 @@
 class MOS6502 extends CPU
 {
 	// registers
-	private int A, X, Y;
+	/* TODO private */ public int A, X, Y, SP;
 
 	// flags
 	private boolean S, O, B, D, I, Z, C;
-
-	// stack pointer
-	private int SP;
 
 	public String name() { return "MOS 6502"; }
 

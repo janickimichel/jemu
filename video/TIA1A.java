@@ -368,7 +368,7 @@ class TIA1A extends Video
 	//
 	// Electron
 	//
-	private int x;
+	/* TODO private */ public int x;
 	private int width;
 	private boolean lastWasSync = false;
 
