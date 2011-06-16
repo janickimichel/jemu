@@ -11,7 +11,7 @@ function Memory(size)
 
     this.get16 = function(pos)
     {
-        return (this.data[pos] << 8) + this.data[pos+1];
+        return (this.data[pos+1] << 8) + this.data[pos];
     }
 
     this.set8 = function(pos, value)
