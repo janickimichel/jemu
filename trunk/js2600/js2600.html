@@ -3,7 +3,7 @@
   <head>
     <title>js2600</title>
 	<style type="text/css">
-	  .cpu, .instruction { border-collapse:collapse; border: 1px black solid; }
+	  .cpu { border-collapse:collapse; border: 1px black solid; }
 	  .instruction { font-size: 8pt; font-family: monospace; }
 	</style>
     <script type="text/javascript" src="util.js"></script>
@@ -18,6 +18,7 @@
   <body onload='atari.create_debugger();'>
     <!--<canvas id='tv' height=198px width=326px></canvas>-->
     <input type='button' value='Step' onclick='atari.step();'>
+    <input type='button' value='Run' onclick='atari.run();'>
     <table id='debugger'>
 	  <tr>
 	    <td>

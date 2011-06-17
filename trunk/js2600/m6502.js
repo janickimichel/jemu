@@ -41,8 +41,16 @@ function M6502(memory)
 
     rel = {
         size: 1,
-        parse: function() { return memory.get8(PC+1); },
-        toString: function(pos) { return memory.get8(pos+1).toString(); },
+        parse: function() 
+        { 
+            p = memory.get8(PC+1);
+            return (p < 128) ? p : (p-256);
+        },
+        toString: function(pos) 
+        { 
+            p = memory.get8(pos+1);
+            return '$' + toHex16(pos + 2 + ((p < 128) ? p : (p-256)));
+        },
         memPos: function() { return null; }
     }
 
@@ -338,7 +346,7 @@ function M6502(memory)
 
     jmp = function(M, D)
     {
-        PC = M;
+        PC = D - 3;
     }
 
     jsr = function(M, D)
@@ -858,5 +866,15 @@ function M6502(memory)
         else
             inst = "DATA $" + opc.toString(16);
         return [ inst, opcodes[opc][1].size, opcodes[opc][4] ];
+    }
+
+    this.registers = function()
+    {
+        return { A:A, X:X, Y:Y, PC:PC, SP:SP, P:P };
+    }
+
+    this.getPC = function()
+    {
+        return PC;
     }
 }
