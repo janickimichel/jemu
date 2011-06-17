@@ -6,15 +6,14 @@ function M6502(memory)
     A = 0;
     X = 0;
     Y = 0;
-    PC = 0;
+    PC = 0xf000;
     SP = 0;
-
 
     //
     // status registers
     // 
     P = { S:0, V:0, B:0, D:0, I:0, Z:0, C:0 };
-
+	this.P = P;
     
     //
     // addressing mode
@@ -513,7 +512,7 @@ function M6502(memory)
     
     sei = function(M, D)
     {
-        P.I = 1;
+		P.I = 1;
     }
 
     sta = function(M, D)
@@ -845,9 +844,7 @@ function M6502(memory)
     {
         opc = memory.get8(PC);
         opcodes[opc][0](opcodes[opc][1].parse(), opcodes[opc][1].memPos());
-        if(opcodes[opc][1].size != 0)
-            PC += opcodes[opc][1].size + 1;
-        //opcodes[opc][3]
+		PC += opcodes[opc][1].size + 1;
     }
 
     //
