@@ -1,0 +1,783 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Television Interface Adaptor - Description</title>
+</head>
+
+<body bgcolor="#FFFFFF" topmargin="8" leftmargin="8">
+<!-- BEGIN WAYBACK TOOLBAR INSERT -->
+
+<script type="text/javascript" src="http://staticweb.archive.org/js/disclaim-element.js" ></script>
+<script type="text/javascript" src="http://staticweb.archive.org/js/graph-calc.js" ></script>
+<script type="text/javascript" src="http://staticweb.archive.org/jflot/jquery.min.js" ></script>
+<script type="text/javascript">
+//<![CDATA[
+var firstDate = 820454400000;
+var lastDate = 1325375999999;
+var wbPrefix = "http://web.archive.org/web/";
+var wbCurrentUrl = "http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm";
+
+var curYear = -1;
+var curMonth = -1;
+var yearCount = 16;
+var firstYear = 1996;
+var imgWidth=400;
+var yearImgWidth = 25;
+var monthImgWidth = 2;
+var trackerVal = "none";
+var displayDay = "24";
+var displayMonth = "Sep";
+var displayYear = "2006";
+var prettyMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function showTrackers(val) {
+	if(val == trackerVal) {
+		return;
+	}
+	if(val == "inline") {
+		document.getElementById("displayYearEl").style.color = "#ec008c";
+		document.getElementById("displayMonthEl").style.color = "#ec008c";
+		document.getElementById("displayDayEl").style.color = "#ec008c";		
+	} else {
+		document.getElementById("displayYearEl").innerHTML = displayYear;
+		document.getElementById("displayYearEl").style.color = "#ff0";
+		document.getElementById("displayMonthEl").innerHTML = displayMonth;
+		document.getElementById("displayMonthEl").style.color = "#ff0";
+		document.getElementById("displayDayEl").innerHTML = displayDay;
+		document.getElementById("displayDayEl").style.color = "#ff0";
+	}
+   document.getElementById("wbMouseTrackYearImg").style.display = val;
+   document.getElementById("wbMouseTrackMonthImg").style.display = val;
+   trackerVal = val;
+}
+function getElementX2(obj) {
+	var thing = jQuery(obj);
+	if((thing == undefined) 
+			|| (typeof thing == "undefined") 
+			|| (typeof thing.offset == "undefined")) {
+		return getElementX(obj);
+	}
+	return Math.round(thing.offset().left);
+}
+function trackMouseMove(event,element) {
+
+   var eventX = getEventX(event);
+   var elementX = getElementX2(element);
+   var xOff = eventX - elementX;
+	if(xOff < 0) {
+		xOff = 0;
+	} else if(xOff > imgWidth) {
+		xOff = imgWidth;
+	}
+   var monthOff = xOff % yearImgWidth;
+
+   var year = Math.floor(xOff / yearImgWidth);
+	var yearStart = year * yearImgWidth;
+   var monthOfYear = Math.floor(monthOff / monthImgWidth);
+   if(monthOfYear > 11) {
+       monthOfYear = 11;
+   }
+   // 1 extra border pixel at the left edge of the year:
+   var month = (year * 12) + monthOfYear;
+   var day = 1;
+	if(monthOff % 2 == 1) {
+		day = 15;
+	}
+	var dateString = 
+		zeroPad(year + firstYear) + 
+		zeroPad(monthOfYear+1,2) +
+		zeroPad(day,2) + "000000";
+
+	var monthString = prettyMonths[monthOfYear];
+	document.getElementById("displayYearEl").innerHTML = year + 1996;
+	document.getElementById("displayMonthEl").innerHTML = monthString;
+	// looks too jarring when it changes..
+	//document.getElementById("displayDayEl").innerHTML = zeroPad(day,2);
+
+	var url = wbPrefix + dateString + '/' +  wbCurrentUrl;
+	document.getElementById('wm-graph-anchor').href = url;
+
+   //document.getElementById("wmtbURL").value="evX("+eventX+") elX("+elementX+") xO("+xOff+") y("+year+") m("+month+") monthOff("+monthOff+") DS("+dateString+") Moy("+monthOfYear+") ms("+monthString+")";
+   if(curYear != year) {
+       var yrOff = year * yearImgWidth;
+       document.getElementById("wbMouseTrackYearImg").style.left = yrOff + "px";
+       curYear = year;
+   }
+   if(curMonth != month) {
+       var mtOff = year + (month * monthImgWidth) + 1;
+       document.getElementById("wbMouseTrackMonthImg").style.left = mtOff + "px";
+       curMonth = month;
+   }
+}
+//]]>
+</script>
+
+<style type="text/css">body{margin-top:0!important;padding-top:0!important;min-width:800px!important;}#wm-ipp a:hover{text-decoration:underline!important;}</style>
+<div id="wm-ipp" style="display:none; position:relative;padding:0 5px;min-height:70px;min-width:800px; z-index:9000;">
+<div id="wm-ipp-inside" style="position:fixed;padding:0!important;margin:0!important;width:97%;min-width:780px;border:5px solid #000;border-top:none;background-image:url(http://staticweb.archive.org/images/toolbar/wm_tb_bk_trns.png);text-align:center;-moz-box-shadow:1px 1px 3px #333;-webkit-box-shadow:1px 1px 3px #333;box-shadow:1px 1px 3px #333;font-size:11px!important;font-family:'Lucida Grande','Arial',sans-serif!important;">
+   <table style="border-collapse:collapse;margin:0;padding:0;width:100%;"><tbody><tr>
+   <td style="padding:10px;vertical-align:top;min-width:110px;">
+   <a href="http://wayback.archive.org/web/" title="Wayback Machine home page" style="background-color:transparent;border:none;"><img src="http://staticweb.archive.org/images/toolbar/wayback-toolbar-logo.png" alt="Wayback Machine" width="110" height="39" border="0"/></a>
+   </td>
+   <td style="padding:0!important;text-align:center;vertical-align:top;width:100%;">
+
+       <table style="border-collapse:collapse;margin:0 auto;padding:0;width:570px;"><tbody><tr>
+       <td style="padding:3px 0;" colspan="2">
+       <form target="_top" method="get" action="http://wayback.archive.org/web/form-submit.jsp" name="wmtb" id="wmtb" style="margin:0!important;padding:0!important;"><input type="text" name="url" id="wmtbURL" value="http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" style="width:400px;font-size:11px;font-family:'Lucida Grande','Arial',sans-serif;" onfocus="javascript:this.focus();this.select();" /><input type="hidden" name="type" value="replay" /><input type="hidden" name="date" value="20060924094923" /><input type="submit" value="Go" style="font-size:11px;font-family:'Lucida Grande','Arial',sans-serif;margin-left:5px;" /><span id="wm_tb_options" style="display:block;"></span></form>
+       </td>
+       <td style="vertical-align:bottom;padding:5px 0 0 0!important;" rowspan="2">
+           <table style="border-collapse:collapse;width:110px;color:#99a;font-family:'Helvetica','Lucida Grande','Arial',sans-serif;"><tbody>
+			
+           <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+           <tr style="width:110px;height:16px;font-size:10px!important;">
+           	<td style="padding-right:9px;font-size:11px!important;font-weight:bold;text-transform:uppercase;text-align:right;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20050322162126/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="22 Mar 2005"><strong>MAR</strong></a>
+		                
+               </td>
+               <td id="displayMonthEl" style="background:#000;color:#ff0;font-size:11px!important;font-weight:bold;text-transform:uppercase;width:34px;height:15px;padding-top:1px;text-align:center;" title="You are here: 9:49:23 Sep 24, 2006">SEP</td>
+				<td style="padding-left:9px;font-size:11px!important;font-weight:bold;text-transform:uppercase;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20070316144629/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="16 Mar 2007"><strong>MAR</strong></a>
+		                
+               </td>
+           </tr>
+
+           <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+           <tr>
+               <td style="padding-right:9px;white-space:nowrap;overflow:visible;text-align:right!important;vertical-align:middle!important;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20050322162126/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" title="16:21:26 Mar 22, 2005" style="background-color:transparent;border:none;"><img src="http://staticweb.archive.org/images/toolbar/wm_tb_prv_on.png" alt="Previous capture" width="14" height="16" border="0" /></a>
+		                
+               </td>
+               <td id="displayDayEl" style="background:#000;color:#ff0;width:34px;height:24px;padding:2px 0 0 0;text-align:center;font-size:24px;font-weight: bold;" title="You are here: 9:49:23 Sep 24, 2006">24</td>
+				<td style="padding-left:9px;white-space:nowrap;overflow:visible;text-align:left!important;vertical-align:middle!important;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20070316144629/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" title="14:46:29 Mar 16, 2007" style="background-color:transparent;border:none;"><img src="http://staticweb.archive.org/images/toolbar/wm_tb_nxt_on.png" alt="Next capture" width="14" height="16" border="0"/></a>
+		                
+			    </td>
+           </tr>
+
+           <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+           <tr style="width:110px;height:13px;font-size:9px!important;">
+				<td style="padding-right:9px;font-size:11px!important;font-weight: bold;text-align:right;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20050322162126/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="22 Mar 2005"><strong>2005</strong></a>
+		                
+               </td>
+               <td id="displayYearEl" style="background:#000;color:#ff0;font-size:11px!important;font-weight: bold;padding-top:1px;width:34px;height:13px;text-align:center;" title="You are here: 9:49:23 Sep 24, 2006">2006</td>
+				<td style="padding-left:9px;font-size:11px!important;font-weight: bold;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20080424113533/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="24 Apr 2008"><strong>2008</strong></a>
+		                
+				</td>
+           </tr>
+           </tbody></table>
+       </td>
+
+       </tr>
+       <tr>
+       <td style="vertical-align:middle;padding:0!important;">
+           <a href="http://wayback.archive.org/web/20060924094923*/http://www.howell1964.freeserve.co.uk/Atari/tia/description.htm" style="color:#33f;font-size:11px;font-weight:bold;background-color:transparent;border:none;" title="See a list of every capture for this URL"><strong>11 captures</strong></a>
+           <div style="margin:0!important;padding:0!important;color:#666;font-size:9px;padding-top:2px!important;white-space:nowrap;" title="Timespan for captures of this URL">27 Jan 03 - 24 Apr 08</div>
+       </td>
+       <td style="padding:0!important;">
+       <a style="position:relative; white-space:nowrap; width:400px;height:27px;" href="" id="wm-graph-anchor">
+       <div id="wm-ipp-sparkline" style="position:relative; white-space:nowrap; width:400px;height:27px;background-color:#fff;cursor:pointer;border-right:1px solid #ccc;" title="Explore captures for this URL">
+			<img id="sparklineImgId" style="position:absolute; z-index:9012; top:0px; left:0px;"
+				onmouseover="showTrackers('inline');" 
+				onmouseout="showTrackers('none');"
+				onmousemove="trackMouseMove(event,this)"
+				alt="sparklines"
+				width="400"
+				height="27"
+				border="0"
+				src="http://wayback.archive.org/jsp/graph.jsp?graphdata=400_27_1996:-1:000000000000_1997:-1:000000000000_1998:-1:000000000000_1999:-1:000000000000_2000:-1:000000000000_2001:-1:000000000000_2002:-1:000000000000_2003:-1:100011000100_2004:-1:000010101000_2005:-1:001000000000_2006:8:000000001000_2007:-1:001000000000_2008:-1:000100000000_2009:-1:000000000000_2010:-1:000000000000_2011:-1:000000000000"></img>
+			<img id="wbMouseTrackYearImg" 
+				style="display:none; position:absolute; z-index:9010;"
+				width="25" 
+				height="27"
+				border="0"
+				src="http://staticweb.archive.org/images/toolbar/transp-yellow-pixel.png"></img>
+			<img id="wbMouseTrackMonthImg"
+				style="display:none; position:absolute; z-index:9011; " 
+				width="2"
+				height="27" 
+				border="0"
+				src="http://staticweb.archive.org/images/toolbar/transp-red-pixel.png"></img>
+       </div>
+		</a>
+
+       </td>
+       </tr></tbody></table>
+   </td>
+   <td style="text-align:right;padding:5px;width:65px;font-size:11px!important;">
+       <a href="javascript:;" onclick="document.getElementById('wm-ipp').style.display='none';" style="display:block;padding-right:18px;background:url(http://staticweb.archive.org/images/toolbar/wm_tb_close.png) no-repeat 100% 0;color:#33f;font-family:'Lucida Grande','Arial',sans-serif;margin-bottom:23px;background-color:transparent;border:none;" title="Close the toolbar">Close</a>
+       <a href="http://faq.web.archive.org/" style="display:block;padding-right:18px;background:url(http://staticweb.archive.org/images/toolbar/wm_tb_help.png) no-repeat 100% 0;color:#33f;font-family:'Lucida Grande','Arial',sans-serif;background-color:transparent;border:none;" title="Get some help using the Wayback Machine">Help</a>
+   </td>
+   </tr></tbody></table>
+
+</div>
+</div>
+<script type="text/javascript">
+ var wmDisclaimBanner = document.getElementById("wm-ipp");
+ if(wmDisclaimBanner != null) {
+   disclaimElement(wmDisclaimBanner);
+ }
+</script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+
+
+<h1><font color="#0000FF">TIA 1A</font></h1>
+
+<h2><font color="#0000FF">TELEVISION INTERFACE ADAPTOR (MODEL 1A)</font></h2>
+
+<p><font color="#0000FF"><strong>GENERAL DESCRIPTION</strong></font></p>
+
+<blockquote>
+<p>The TIA1A is an MOS integrated circuit designed to
+ interface between an eight (8) bit microprocessor and a
+ television video modulator and to convert eight (8) bit
+ parallel data into serial outputs for the color, luminosity,
+ and composite sync required by a video modulator.</p>
+<p>This circuit operates on a &quot;line by line&quot; basis,
+ always outputing the same information every television line
+ unless new data is written into it by the microprocessor.</p>
+<p>A hardware sync counter produces horizontal sync timing
+ independent of the microprocessor.</p>
+<p>Vertical sync timing is supplied to this circuit by the
+ microprocessor and combined into composite sync.</p>
+<p>Horizontal position counters are used to trigger the
+ serial output of five (5) horizontally moveable objects; two
+ players, two missiles and a ball. The microprocessor can add
+ or subtract from these position counters to move these
+ objects right or left.</p>
+<p>The microprocessor determines all vertical position and
+ motion by writing zeros or ones into object registers before
+ each appropriate horizontal line.</p>
+<p>Walls, clouds and other seldom moved objects are produced
+ by a low resolution data register called the playfield
+ register.</p>
+<p>A fifteen (15) bit collision register detects all fifteen
+ possible two object collisions between these six (6) objects
+ (five moveable and one playfield). This collision register
+ can be read and reset by the microprocessor. Six input ports
+ are also provided on this chip that can be read by the
+ microprocessor. These input ports and the collision register
+ are the only chip addresses that can be read by the
+ microprocessor. All other addresses are write only.</p>
+<p>Color luminosity registers are included that can be
+ programmed by the microprocessor with eight (8) luminosity
+ and fifteen (15) color values. A digital phase shifter is
+ included on this chip to provide a single color output with
+ fifteen (15) phase angles.</p>
+<p>Two (2) independent audio generating circuits are
+ included, each with programmable frequency, noise content,
+ and volume control registers.</p>
+</blockquote>
+
+<p><font color="#0000FF">DETAIL DESCRIPTION</font></p>
+
+<blockquote>
+<p><font color="#0000FF">1. Data and addressing</font></p>
+<p>Registers on this chip are addressed by the
+ microprocessors part of its overall RAM-ROM memory space. The
+ attached table of read-write addresses summarizes the
+ addressable functions. There are no registers that are both
+ read and write. Some addresses how- ever are both read and
+ write, with write data going into one register and read data
+ returning from a different register.</p>
+<p>If the read-write line is low, the data bits indicated in
+ this table will be written into the addressed write location
+ when the Ø2 clock goes from high to low. Some registers are
+ eight bits wide, some only one bit, and some (strobes) have
+ no bits, performing only control functions (such as resets)
+ when their address is written.</p>
+<p>If the read-write line is high, the addressed location can
+ be read by the microprocessor on data lines 6 and 7 while the
+ Ø2 clock is high.</p>
+<p>The addresses given in the table refer only to the six (6)
+ real address lines. If any of the four (4) chip select lines
+ are used for addressing, the addresses must be modified
+ accordingly.</p>
+<p><font color="#0000FF">2. Synchronization</font></p>
+<blockquote>
+<p><font color="#0000FF">A. Horizontal Timing</font></p>
+<p>A hardware counter on this chip produces all
+ horizontal timing (such as sync, blank, burst)
+ independent of the microprocessor, This counter is driven
+ from an external 3.58 MHZ oscillator and has a total
+ count of 228. Blank is decoded as 68 counts and sync and
+ color burst as 16 counts.</p>
+<p><font color="#0000FF">B. Vertical Timing</font></p>
+<p>There are one bit, addressable registers on this chip
+ for vertical sync and vertical blank. The timing for
+ these functions is established by the microprocessor by
+ writing zero or one into these bits. (VSYNC, VBLANK)</p>
+<p><font color="#0000FF">C. Composite Sync</font></p>
+<p>Horizontal sync and the output of the vertical sync
+ bit are combined together to produce composite sync. This
+ composite sync signal drives a chip output pad to an
+ external composite video resistor network.</p>
+<p><font color="#0000FF">D. Microprocessor
+ Synchronization</font></p>
+<p>The 3.58 MHZ oscillator also clocks a divide by three
+ counter on this chip whose output (1.19 MHZ) is buffered
+ to drive an output pad called Ø0 This pad provides the
+ input phase zero clock to the microprocessor which then
+ produces the system Ø2 clock (1.19 MHZ).</p>
+<p>Software program loops require different lengths of
+ time to run depending on branch decisions made within the
+ program. Additional synchronization (Shown in Figure 2)
+ is, therefore, required be- tween the software and
+ hardware. This is done with a one bit latch called WSYNC
+ (wait for sync). When the microprocessor finishes a
+ routine such as loading registers for a ' horizontal.
+ line, or computing new vertical locations during vertical
+ blank, it can address WSYNC, setting this latch high.
+ When this latch is high, it drives an output pad to zero
+ connected to the microprocessor ready line (RDY). A zero
+ on this line causes the microprocessor to halt and wait.
+ As shown in figure 2, WSYNC latch is automatically reset
+ to zero by the leading edge of the next horizontal blank
+ timing signal, releasing the RDY line, allowing the
+ microprocessor to begin its computation and register
+ writing for this horizontal television line or line pair.</p>
+</blockquote>
+<p><font color="#0000FF">3. Playfield graphics Register</font></p>
+<blockquote>
+<p><font color="#0000FF">A. Description</font></p>
+<p>Objects, (such as walls, clouds, and score) which are
+ not required to move, are written into a 20 bit register
+ called the playfield register. This register (Figure 5)
+ is loaded from the data bus by three separate write
+ addresses (PF0, PF1, PF2). Playfield may be loaded at any
+ time. To clear the playfield, zeros must be written into
+ all three addresses.</p>
+<p><font color="#0000FF">B. Normal Serial Output</font></p>
+<p>The playfield register is automatically scanned (and
+ converted to serial output) by a bi-directional shift
+ register clocked at a rate which spreads the twenty (20)
+ bits out over the left half of a horizontal line. This
+ scanning is initiated by the end of horizontal blank
+ (left edge of television screen). Normally the same scan
+ is then repeated, duplicating the same twenty (20) bit
+ sequence over the right half of the horizontal line.</p>
+<p><font color="#0000FF">C. Reflected Serial-Output</font></p>
+<p>A relected playfield may be requested by writing a one
+ into bit zero of the playfield control register (CTRLPF).
+ When this bit is true the scanning shift register will
+ scan the opposite direction during the right half of the
+ horizontal line, reversing the twenty (20) bit sequence.</p>
+<p><font color="#0000FF">D. Timing Constraints</font></p>
+<p>Even though the playfield bytes (PFO, PF1, PF2) may be
+ written at any time, if one of them is changed while
+ being serially scanned, part of the old q/the new value
+ may both show up on the television horizontal line.</p>
+</blockquote>
+<p><font color="#0000FF">4. Horizontal Position Counters</font></p>
+<blockquote>
+<p><font color="#0000FF">A. Description</font></p>
+<p>The playfield is a &quot;fixed&quot; graphics
+ register, always starting its serial output when
+ triggered by the beginning of each television line. This
+ chip also includes five &quot;moveable&quot; graphics
+ registers, whose serial outputs are triggered by five
+ separate horizontal position counters every time these
+ counters pass through zero count. These position counters
+ are clocked continuously during the unblanked portion of
+ every horizontal line and their count length is exactly
+ equal to the normal number of clocks supplied to them
+ during this time. They will therefore pass through zero
+ at the same time during each horizontal television line
+ and the triggered outputs will have no horizontal motion.
+ A typical horizontal counter is shown in figure 4.</p>
+<p>If extra clocks are supplied to these counters (or
+ normal clocks suppressed) the zero crossing time will
+ shift and the object will have moved left (extra clocks).
+ or right (fewer Clocks). Some position counters have
+ extra decodes (in addition to a zero decode) to trigger
+ multiple copies of the same object across a horizontal
+ line.</p>
+<p>All position counters can be reset to zero count by
+ the microprocessor at any time, by a write instruction to
+ the reset addresses (RESBL, RESM0, RESM1, RESP0, RESP1).
+ If reset occurs during horizontal blank, the object will
+ appear at the left side of the television screen.
+ Properly timed resets may position an object at any
+ horizontal location consistent with the microprocessor
+ cycle time.</p>
+<p><font color="#0000FF">B. Ball Position Counter</font></p>
+<p>The ball position counter has only the zero crossing
+ decode and therefore cannot trigger multiple copies of
+ the ball graphics.</p>
+<p><font color="#0000FF">C. Player Position Counters</font></p>
+<p>Each player position counter has three decodes in
+ addition to the zero crossing decode. These decodes are
+ controlled by bits 0,1,2 of the number size control
+ registers (NUSIZ0, NUSIZ1), and trigger 1,2, or 3 copies
+ of the player (at various spacings) across a horizontal
+ line as shown on page<font color="#FF0000">___</font>.
+ These same control bits are used for the decodes * on the
+ missile position counter, insuring an equal number of
+ players and missiles.</p>
+<p><font color="#0000FF">D. Missile Position Counters</font></p>
+<p>Missile position counters are identical to player
+ position counters except that they have another type of
+ reset in addition to the previously discussed horizontal
+ position reset. These extra reset addresses (RESMP0,
+ RESMP1) write data bit 1 into a one bit register whose
+ output is used to position the missile (horizontally)
+ directly on top of its corresponding player, and to
+ disable the missile serial output.</p>
+</blockquote>
+<p><font color="#0000FF">5. Horizontal Motion Registers</font></p>
+<blockquote>
+<p><font color="#0000FF">A. General Description</font></p>
+<p>There are five write only registers on this chip that
+ contain the horizontal motion values for each of the five
+ moving objects. A typical horizontal motion register is
+ shown in figure 4. The data bus (bits 4 through 7) is
+ written into these addresses (HMP0, HMP1, HMM0, HMM1,
+ HMBL) to load these registers with motion values. These
+ registers supply extra (or fewer) clocks to the
+ horizontal position counters only when commanded to do so
+ by an HMOVE address from the microprocessor. These
+ registers may all be cleared to zero (no motion)
+ simultaneously by an HMCLR command from the
+ microprocessor, or individually by loading zeros into
+ each register. These registers are each four bits in
+ length and may be loaded with positive (left motion),
+ negative (right motion) or zero (no motion) values.
+ Negative values are represented in twos complement
+ format.</p>
+<p><em>(there are no sections B and C in the document.)</em></p>
+<p><font color="#0000FF">D. Timing Constraints</font></p>
+<p>These registers may be loaded or cleared at almost any
+ time. The motion values they contain will be used only
+ when an HMOVE command is addressed, and then all five
+ motion values will be used simultaneously-into all five
+ horizontal position counters once. The only timing
+ constraint on this operation involves the HMOVE command.
+ The HMOVE command must be located in the microprocessor
+ program immediately after a wait for sync (WSYNC)
+ command. This insures that the HMOVE operation begins at
+ the leading edge of horizontal blank, and has the full
+ blank time to supply extra or fewer clocks to the
+ horizontal position counters. These registers should not
+ be modified for at least 24 Computer cycles after the
+ HMove command.</p>
+</blockquote>
+<p><font color="#0000FF">6. Moving Object Graphics Registers</font></p>
+<blockquote>
+<p><font color="#0000FF">A. General Description</font></p>
+<p>There are five graphics registers for moving objects
+ on this chip. These graphics registers are loaded
+ (written) in parallel by the microprocessor and like the
+ playfield register are scanned and converted to serial
+ output. Unlike the playfield register, which is always
+ scanned beginning at the left side of each horizontal
+ line, moving object graphics registers are scanned only
+ when triggered by a start decode from their horizontal
+ position counter. A typical graphics register is shown in
+ figure 4.</p>
+<p><font color="#0000FF">B. Missile Graphics</font></p>
+<p>The graphics registers for both missiles are identical
+ and very simple. They each consist of a one bit register
+ called missile enable (ENAM0, ENAM1). This graphics bit
+ is scanned (outputed) only when triggered by its
+ corresponding position counter. There are control bits
+ (bits 4,5, of NUSIZ0, NUSIZ1) that can stretch this
+ single graphics bit out over widths of 1, 2, 4, or 8
+ clocks of horizontal line time. (A full line is 160
+ clocks).</p>
+<p><font color="#0000FF">C. Player Graphics</font></p>
+<p>The graphics registers for both players are identical
+ and are rather complex. They each consist of eight bit
+ parallel registers (GRPO, GRP1) and a bi-directional
+ parallel to serial scan counter that converts the
+ parallel data into serial output.</p>
+<p>A one bit control register (REFP0, REFP1) determines
+ the direction (reflection) of the parallel to serial
+ scan, outputing either D7 through D0, or D0 through D7.
+ This allows reflection (horizontal flipping) of player
+ serial graphics data without having to flip the
+ microprocessor data.</p>
+<p>The clock into the scan counter can be controlled
+ (three bits of NUSIZ0 and NUSIZ1) to slow the scan rate
+ and stretch the eight bits of serial graphics out over
+ widths of 8, 16, or 32 clocks of horizontal line time.
+ These same control bits are used in the player missile
+ motion counters to control multiple copies, so only three
+ player widths (scan rates) are available.</p>
+<p><font color="#0000FF">D. Vertical Delay</font></p>
+<p>Each of the player graphics registers actually
+ consists of two 8 bit parallel registers. The first
+ (GRP0, GRPl) is loaded (written) from the microprocessor
+ 8 bit data bus. The second is automatically loaded from
+ the output of the first. The reason for this is a complex
+ subject called vertical delay. A large amount of
+ microprocessor time is required to generate player,
+ missile and playfield graphics (table look up, masking,
+ comparisons, etc.) and load these into this chip's
+ registers. For most game programs this is time is just
+ too large to fit into one horizontal line time. In fact
+ for most games it will barely fit into two line times
+ (127 microseconds). Therefore, individual graphics
+ registers are loaded (written) every two lines, and used
+ twice for serial output between loads. This type of
+ programming will obviously limit the vertical height
+ resolution of objects to multiples of two lines. It also
+ will limit the resolution of vertical motion to two lines
+ jumps.</p>
+<p>Nothing can be done about the vertical height
+ resolution; however, vertical motion can be resolved to a
+ single line by addition of a second graphics register
+ that is automatically parallel loaded from the output of
+ the first, one line time after the first was loaded from
+ the data bus. This second graphics register output is
+ therefore always delayed vertically by one line. A
+ control bit called vertical delay (VDEL0, VDEL1) selects
+ which of these two registers is to be used for, serial
+ output. If this control bit is set by the microprocessor
+ between picture frames the object will be moved down
+ (delayed) by, one line during the next frame.</p>
+<p>In most programming applications player 0 graphics and
+ player I graphics are loaded (written) alternately,
+ during the blank time just prior to each line as shown in
+ (figure 1). Since GRP0 and GRP1 addresses from the
+ microprocessor alternate, they are delayed by one line
+ from each other. The GRP0 address decode can therefore be
+ used to load the delayed graphics register for player 1,
+ and GRP1 likewise to load the delayed graphics register
+ for player 0. The two vertical delay bits (VDEL0, VDELl)
+ then select delayed or undelayed registers for player 0
+ and player 1 as serial outputs.</p>
+<p><font color="#0000FF">E. Ball Graphics</font></p>
+<p>The ball graphics register is almost identical to the
+ missile graphics register. It also consists of a single
+ enable bit (ENABL) whose output is triggered by the ball
+ position counter. It also has two control bits (bits 41 5
+ of CTRLPF) that can stretch this single graphics bit out
+ over widths of 1, 2, 4, or 8 clocks of horizontal line
+ time. Unlike the missile graphics, however, the ball
+ graphics register has capability for vertical delay
+ similar to the player graphics. A second graphics
+ (enable) bit is alternately loaded from the output of the
+ first, one line after the first was loaded from the data
+ bus. A ball vertical delay bit (VDELBL) selects which of
+ these two graphics bits is used for the ball serial
+ output. The first graphics bit (ENABL) should be loaded
+ during the same horizontal blank time as player 0 (GRP0),
+ because GRP1 is used to load the second enable bit from
+ the output of the first on alternate lines.</p>
+</blockquote>
+<p><font color="#0000FF">7. Collision Detection Latches</font></p>
+<blockquote>
+<p><font color="#0000FF">A. Definitions</font></p>
+<p>The serial outputs from all the graphics registers
+ represent real time horizontal location of objects on the
+ television screen. If any of these outputs occur at the
+ same time, they will overlap (collide) on the screen.
+ There are six objects generated on this chip (five moving
+ and playfield'. allowing fifteen possible two object
+ collisions. These overlaps collisions) are detected by
+ fifteen &quot;and&quot; gates whenever they occur, add
+ are stored in fifteen individual latch register bits, as
+ shown in figure 6.</p>
+<p><font color="#0000FF">B. Reading Collisions</font></p>
+<p>The microprocessor can read these fifteen collision
+ bits on data lines 6 and 7 by addressing them two at a
+ time. This could be done at any time but is usually done
+ between frames (during vertical blank) after all possible
+ collisions have serially occured.</p>
+<p><font color="#0000FF">C. Reset</font></p>
+<p>All collision bits are reset simultaneously by the
+ microprocessor using the reset address CXCLR. This is
+ usually done near the end of vertical blank, after
+ collisions have been tested.</p>
+</blockquote>
+<p><font color="#0000FF">8. Input ports</font></p>
+<blockquote>
+<p><font color="#0000FF">A. General Description</font></p>
+<p>There are 6 input ports on this chip whose logic state
+ may be read on data line 7 with read addresses INPT0
+ through INPT5. These 6 parts are divided into two types,
+ &quot;dumped&quot; and &quot;latched&quot;. See Figure 8.</p>
+<p><font color="#0000FF">B. Dumped lnput Ports (I0
+ through I3)</font></p>
+<p>These 4 input parts are normally used to read paddle
+ position from an external potentiometer-capacitor
+ circuit. In order to discharge these capacitors each of
+ these input ports has a large transistor, which may be
+ turned on (grounding the input ports) by writing into bit
+ 7 of the register VBLANK. When this control bit is
+ cleared the potentimeters begin to recharge the
+ capacitors and the microprocessor measures the time
+ required to detect a logic 1 at each input port.</p>
+<p>As long as bit 7 of register VBLANK is zero, these
+ four ports are general purpose high impedance input
+ ports. When this bit is a 1 these ports are grounded.</p>
+<p><font color="#0000FF">C. Latched Input ports (I4, I5)</font></p>
+<p>These two input ports have latches which can be
+ enabled or disabled by writing into bit 6 of register
+ VBLANK.</p>
+<p>When disabled, these latches are removed from the
+ circuit completly and these ports become two general
+ purpose input ports, whose present logic state can be
+ read directly by the microprocessor.</p>
+<p>When enabled, these latches will store negative (zero
+ logic level) signals appearing on these two input ports,
+ and the input port addresses will read the latches
+ instead of the input ports.</p>
+<p>When first enabled these latches will remain positive
+ as long as the input ports remain positive (logic one). A
+ zero input port signal will clear a latch value to zero,
+ where it will remain (even after the port returns
+ positive) until disabled. Both latches may be
+ simultaneously disabled by writing a zero into bit 6 of
+ register VBLANK.</p>
+</blockquote>
+<p><font color="#0000FF">8.5 Priority Encoder</font></p>
+<blockquote>
+<p><font color="#0000FF">A. Purpose</font></p>
+<p>As discussed in the section on collisions,
+ simultaneous serial outputs from the graphics registers
+ represent overlap on the television screen. In order to
+ have color-luminosity values assigned to individual
+ objects it is necessary to establish priorities between
+ objects when overlapped. The priority encoder is shown in
+ figure 3.</p>
+<p><font color="#0000FF">B. Priority Assignment</font></p>
+<p>The lack of any objects results in a color-lum value
+ called the background. The background (BK) has lowest
+ priority and only appears when no objects are outputing.
+ In order to simplify the logic each missile is given the
+ same color-lum value and priority as it's corresponding
+ player (P0, M0) and the ball is given the same color-lum
+ value and priority as the playfield (PF, BL).</p>
+<p>The following table illustrates the normal priority
+ assignment:</p>
+<pre>
+Highest Priority P0, M0
+Second Highest   P1, M1
+Third Highest    PF, BL
+Lowest Priority  BK
+</pre>
+<p>Objects with higher priority will appear to move in
+ front of objects with lower priority. Players will
+ therefore move in front of playfield (clouds, walls,
+ etc.).</p>
+<p><font color="#0000FF">C. Priority Control</font></p>
+<p>There are two playfield control bits that affect
+ priority, one called playfield priority (PFP) (bit 2 of
+ CTRLPF) and one called score (bit 1 of CTRLPF). When a
+ one is written into the PFP bit the priority assignment
+ is modified as shown below.</p>
+<pre>Highest Priority PF, BL
+Second Highest P0, M0
+Third Highest P1, M1
+Lowest Priority BK
+</pre>
+<p>Players will then move behind playfield (clouds, wall,
+ etc.).</p>
+<p>When a one is written into the score control bit, the
+ playfield is forced to take the color-lum of player 0 in
+ the left half of the screen and player 1 in the right
+ half of the screen. This is used when displaying score
+ and identifiers the score with the correct player.</p>
+<p>The priority encoder produces 4 register select lines
+ (shown in figure 3) that are mutually exclusive. These 4
+ lines select either background, player 0, player 1 or
+ playfield, and only one of them can be true at a time.</p>
+</blockquote>
+<p><font color="#0000FF">9. Color Luminance Registers</font></p>
+<blockquote>
+<p><font color="#0000FF">A. Description</font></p>
+<p>There are four registers (shown in figure 3) that
+ contain color- lum codes. Four bits of color code and
+ three bits of luminance code may be written into each of
+ these registers (COLUP0, COLUP1, COLUPF, COLUBK) by the
+ microprocessor at any time. These codes (representing 16
+ color values and 8 luminance values) are given in the
+ Detailed Address List.</p>
+<p><font color="#0000FF">B. Multiplexing</font></p>
+<p>The serial graphics output from all six objects is
+ examined by the priority encoder which activates one of
+ the four select lines into a 4 X 7 multiplexer. This
+ multiplexer (shown in figure 3) then selects one of the
+ four color-lum registers as a 7 line output. Three of
+ these lines are binary coded luminosity and go directly
+ to chip output pads. The other .four lines go to the
+ color phase shifter.</p>
+</blockquote>
+<p><font color="#0000FF">10. Color Phase Shifter</font></p>
+<p>This portion of the chip (shown in figure 3) produces a
+ reference color output (color burst) during horizontal blank
+ and then during the unblanked portion of the line it produces
+ a color output shifted in phase with respect to the color
+ burst. The amount of phase shift determines the color and is
+ selected by the four color code lines from the Color-lum.
+ multiplexer. Binary code 0 selects no color. Code 1 selects
+ gold (same phase as color burst). Codes 2 (0010) through 15
+ (1111) shift the phase from zero through almost 360 degrees
+ allowing selection of 15 total colors around the television
+ color wheel.</p>
+<p><font color="#0000FF">11. Audio Circuits</font></p>
+<p>Two audio circuits are incorporated on this chip. They are
+ identical and completely independent, although their outputs
+ could be combined externally into one speaker. Each audio
+ circuit consists of parts described below, and in figure 7.</p>
+<blockquote>
+<p><font color="#0000FF">A. Frequency Select</font></p>
+<p>Clock pulses (at approximately 30 kHz) from the
+ horizontal sync counter pass through a &quot;divide by
+ N&quot; circuit which is controlled by the output code
+ from a five bit frequency register (AUDF). This register
+ can be loaded (written) by the microprocessor at any
+ time, and causes the 30 kHz clocks to be divided by 1
+ (code 00000) through 32 (code 11111). This produces
+ pulses that are digitally adjustable from approximately
+ 30 kHz to 1 kHz and are used to clock the noise-tone
+ generator.</p>
+<p><font color="#0000FF">B. Noise-Tone Generator</font></p>
+<p>This circuit contains a nine bit shift counter which
+ may be controlled by the output code from a four bit
+ audio control register (AUDC), and is clocked by the
+ frequency select circuit. The control register can be
+ loaded by the micro- processor at any time, and selects
+ different shift counter feedback taps and count lengths
+ to produce a variety of noise and tone qualities.</p>
+<p><font color="#0000FF">C. Volume Select</font></p>
+<p>The shift counter output is used to drive the audio
+ output pad through four driver transistors that are
+ graduated in size. Each transistor is twice as large as
+ the previous one and is enabled by one bit from the audio
+ volume register (AUDV). This audio volume register may
+ be loaded by the microprocessor at any time. As binary
+ codes 0 through 15 are loaded, the pad drive transistors
+ are enabled in a binary sequence. The shift counter
+ output therefore can pull down on the audio output pad
+ with 16 selectable impedance levels.</p>
+</blockquote>
+</blockquote>
+
+<p><a href="http://web.archive.org/web/20060924094923/http://www.howell1964.freeserve.co.uk/Atari/tia/index.htm">Contents</a> |<a href="http://web.archive.org/web/20060924094923/http://www.howell1964.freeserve.co.uk/Atari/tia/figures.htm">Next</a></p>
+</body>
+</html>
+
+
+
+
+
+<!--
+     FILE ARCHIVED ON 9:49:23 Sep 24, 2006 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 15:21:22 Jun 17, 2011.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->

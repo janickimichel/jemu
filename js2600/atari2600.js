@@ -3,6 +3,7 @@ function Atari2600()
     this.memory = new Memory(64 * 0x1000);
     this.cpu = new M6502(this.memory);
 	this.last_elem_debug = null;
+    this.breakpoints = {}
 
     this.load_rom = function(data)
     {
@@ -21,6 +22,13 @@ function Atari2600()
 		this.update_debugger();
     }
 
+    this.run = function()
+    {
+        while(this.breakpoints[this.cpu.getPC()] == null)
+            this.cpu.step();
+		this.update_debugger();
+    }
+
     this.create_debugger = function()
     {
         pos = 0xf000;
@@ -28,7 +36,11 @@ function Atari2600()
         while(this.memory.get8(pos) != 255 && pos <= 0xffff)
         {
             dbg = this.cpu.debug(pos);
-            instructions.push('<tr id="pos_' + toHex16(pos) + '"><td class="instruction">' + toHex16(pos) + '</td><td class="instruction">' + dbg[0] + '</td></tr>');
+            instructions.push('<tr ondblclick="atari.set_bkp(0x' + toHex16(pos) + ');" id="pos_' + toHex16(pos) + '">' + 
+                                 '<td class="instruction" id="bkp_' + toHex16(pos) + '" style="color: red;">&nbsp;</td>' + 
+                                 '<td class="instruction">' + toHex16(pos) + '</td>' + 
+                                 '<td class="instruction">' + dbg[0] + '</td>' + 
+                              '</tr>');
             pos += dbg[1] + 1;
         }
         document.getElementById('cpu').innerHTML = instructions.join('\n');
@@ -37,26 +49,42 @@ function Atari2600()
 	
 	this.update_debugger = function()
 	{
-		// cpu
+        reg = this.cpu.registers();
+
+        // cpu
 		if(this.last_elem_debug)
 			document.getElementById('pos_' + this.last_elem_debug).style.backgroundColor = null;
-		document.getElementById('pos_' + toHex16(this.cpu.getPC())).style.backgroundColor = 'yellow';
-		this.last_elem_debug = toHex16(this.cpu.getPC());
+		document.getElementById('pos_' + toHex16(reg.PC)).style.backgroundColor = 'Khaki';
+		this.last_elem_debug = toHex16(reg.PC);
 		
 		// registers
-		document.getElementById('reg_a').innerHTML = toHex8(this.cpu.A);
-		document.getElementById('reg_x').innerHTML = toHex8(this.cpu.X);
-		document.getElementById('reg_y').innerHTML = toHex8(this.cpu.Y);
-		document.getElementById('reg_pc').innerHTML = toHex8(this.cpu.getPC());
-		document.getElementById('reg_sp').innerHTML = toHex8(this.cpu.SP);
+		document.getElementById('reg_a').innerHTML = toHex8(reg.A);
+		document.getElementById('reg_x').innerHTML = toHex8(reg.X);
+		document.getElementById('reg_y').innerHTML = toHex8(reg.Y);
+		document.getElementById('reg_pc').innerHTML = toHex8(reg.PC);
+		document.getElementById('reg_sp').innerHTML = toHex8(reg.SP);
 
 		// flags
-		document.getElementById('flag_s').innerHTML = this.cpu.P.S;
-		document.getElementById('flag_v').innerHTML = this.cpu.P.V;
-		document.getElementById('flag_b').innerHTML = this.cpu.P.B;
-		document.getElementById('flag_d').innerHTML = this.cpu.P.D;
-		document.getElementById('flag_i').innerHTML = this.cpu.P.I;
-		document.getElementById('flag_z').innerHTML = this.cpu.P.Z;
-		document.getElementById('flag_c').innerHTML = this.cpu.P.C;
+		document.getElementById('flag_s').innerHTML = reg.P.S;
+		document.getElementById('flag_v').innerHTML = reg.P.V;
+		document.getElementById('flag_b').innerHTML = reg.P.B;
+		document.getElementById('flag_d').innerHTML = reg.P.D;
+		document.getElementById('flag_i').innerHTML = reg.P.I;
+		document.getElementById('flag_z').innerHTML = reg.P.Z;
+		document.getElementById('flag_c').innerHTML = reg.P.C;
 	}
+
+    this.set_bkp = function(address)
+    {
+        if(this.breakpoints[address])
+        {
+            this.breakpoints[address] = null;
+            document.getElementById('bkp_' + toHex16(address)).innerHTML = '&nbsp;';
+        }
+        else
+        {
+            this.breakpoints[address] = 1;
+            document.getElementById('bkp_' + toHex16(address)).innerHTML = '&#9679;';
+        }
+    }
 }
