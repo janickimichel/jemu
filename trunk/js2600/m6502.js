@@ -853,6 +853,7 @@ function M6502(memory)
         opc = memory.get8(PC);
         opcodes[opc][0](opcodes[opc][1].parse(), opcodes[opc][1].memPos());
 		PC += opcodes[opc][1].size + 1;
+        return opcodes[opc][4];
     }
 
     //

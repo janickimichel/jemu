@@ -1,0 +1,22 @@
+<!DOCTYPE html5>
+<html>
+  <head>
+    <title>js2600</title>
+    <script type="text/javascript">
+
+window.onload = function() {
+var ctx = document.getElementById('tv').getContext('2d');
+var d = ctx.getImageData(0, 0, 100, 100);
+d.data[0] = 0;
+d.data[1] = 0;
+d.data[2] = 0;
+d.data[3] = 255;
+ctx.putImageData(d, 0, 0);
+}
+
+    </script>
+  </head>
+  <body>
+    <canvas id='tv' height=100 width=100></canvas>
+  </body>
+</html>
