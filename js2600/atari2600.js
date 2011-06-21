@@ -2,6 +2,9 @@ function Atari2600()
 {
     this.memory = new Memory(64 * 0x1000);
     this.cpu = new M6502(this.memory);
+    this.video = new TIA();
+    this.memory.video = this.video;
+
 	this.last_elem_debug = null;
     this.breakpoints = {}
 
@@ -18,15 +21,30 @@ function Atari2600()
 
     this.step = function()
     {
-        this.cpu.step();
+        cycles = this.cpu.step();
+        this.video.step(cycles * 3, true);
 		this.update_debugger();
     }
 
     this.run = function()
     {
         while(this.breakpoints[this.cpu.getPC()] == null)
-            this.cpu.step();
+        {
+            cycles = this.cpu.step();
+            this.video.step(cycles * 3, false);
+        }
 		this.update_debugger();
+    }
+
+    this.next_line = function()
+    {
+        new_y = this.video.y + 1;
+        while(this.video.y != new_y)
+        {
+            cycles = this.cpu.step();
+            this.video.step(cycles * 3, false);
+        }
+        this.update_debugger();
     }
 
     this.create_debugger = function()
@@ -72,6 +90,12 @@ function Atari2600()
 		document.getElementById('flag_i').innerHTML = reg.P.I;
 		document.getElementById('flag_z').innerHTML = reg.P.Z;
 		document.getElementById('flag_c').innerHTML = reg.P.C;
+        
+        // TIA
+        document.getElementById('tia_x').innerHTML = this.video.x;
+        document.getElementById('tia_y').innerHTML = this.video.y;
+        document.getElementById('tia_colubk').innerHTML = this.video.COLUBK;
+        document.getElementById('tia_colubk_c').style.backgroundColor = htmlColor(colors[this.video.COLUBK]);
 	}
 
     this.set_bkp = function(address)

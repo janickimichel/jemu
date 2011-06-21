@@ -18,6 +18,11 @@ function toHex16(v)
     return s + v.toString(16).toUpperCase();
 }
 
+function htmlColor(c)
+{
+    return '#' + toHex8(c >> 24) + toHex8((c >> 16) & 0xff) + toHex8(c & 0xff);
+}
+
 function decode64(input)
 { 
         var output = Array();

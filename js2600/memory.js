@@ -11,11 +11,14 @@ function Memory(size)
 
     this.get16 = function(pos)
     {
-        return (this.data[pos+1] << 8) + this.data[pos];
+        return (this.get8(pos+1) << 8) + this.get8(pos);
     }
 
     this.set8 = function(pos, value)
     {
-        this.data[pos] = value & 0xff;
+        if(pos <= 0x2c)
+            this.video.set_register(pos, value);
+        else
+            this.data[pos] = value & 0xff;
     }
 }
